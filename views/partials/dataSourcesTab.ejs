@@ -1,0 +1,64 @@
+<div id="csvSources" class="tab" style="display: none;">
+  <form method="get">
+    <label for="location">Location:</label>
+    <select id="location" name="location">
+      <% locationOptions.forEach(option => { %>
+        <option value="<%= option.path %>"><%= option.name %></option>
+      <% }); %>
+    </select> 
+    <label for="csvFile">Select a CSV file:</label>
+    <select id="csvFile" name="csvFile">
+      <% csvFiles.forEach(csvFile => { %>
+        <option value="<%= csvFile %>" 
+          <%= selectedCSVFile === csvFile ? 'selected' : '' %>><%= csvFile %>
+        </option>
+      <% }); %>
+    </select>
+    <button type="submit">Load CSV</button>
+    <button type="button" id="exportButton">Export Selected CSV</button>
+  </form>
+
+  <div class="table-container">
+  <table class="scrollable-table">
+    <thead>
+      <tr>
+        <% headers.forEach(header => { %>
+        <th><%= header %></th>
+        <% }); %>
+      </tr>
+    </thead>
+    <tbody>
+      <% data.forEach(row => { %>
+      <tr>
+        <% Object.values(row).forEach(value => { %>
+        <td><%= value %></td>
+        <% }); %>
+      </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const locationSelect = document.getElementById("location");
+
+    locationSelect.addEventListener("change", function () {
+      const selectedLocation = locationSelect.value;
+      
+      // Send a request to the server to change the directory based on the selected location
+      // You can use a fetch request or other AJAX method here to update the data
+      // For example, you can update the URL for the data request.
+      
+      // Redirect to a new URL with the selected location
+      window.location.href = `/data?location=${encodeURIComponent(selectedLocation)}`;
+    });
+  });
+  document
+    .getElementById("exportButton")
+    .addEventListener("click", function () {
+      const selectedCSV = document.getElementById("csvFile").value;
+      window.location.href = `/data/raw/${selectedCSV.replace(".csv", "")}`;
+    });
+</script>
+</div>

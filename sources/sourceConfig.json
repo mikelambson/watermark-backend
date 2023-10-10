@@ -1,0 +1,33 @@
+{
+  "mode": "LAN",
+  "sources": [
+    {
+      "name": "Source 1",
+      "lanLocation": "LAN_Location_1",
+      "remoteLocation": "Remote_Location_1",
+      "localFolder": "Local_Folder_1",
+      "setTo": "lan"
+    },
+    {
+      "name": "Source 2",
+      "lanLocation": "LAN_Location_2",
+      "remoteLocation": "Remote_Location_2",
+      "localFolder": "Local_Folder_2",
+      "setTo": "lan"
+    },
+    {
+      "name": "Source 3",
+      "lanLocation": "LAN_Location_3",
+      "remoteLocation": "Remote_Location_3",
+      "localFolder": "Local_Folder_3",
+      "setTo": "remote"
+    },
+    {
+      "name": "Source 4",
+      "lanLocation": "LAN_Location_4",
+      "remoteLocation": "Remote_Location_4",
+      "localFolder": "Local_Folder_4",
+      "setTo": "local"
+    }
+  ]
+}

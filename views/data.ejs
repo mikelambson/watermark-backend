@@ -1,0 +1,15 @@
+<!-- data.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Include the head.ejs template to set up the common head elements -->
+    <%- include('partials/head', { pageTitle: "Data" }) %>
+    <link rel="stylesheet" href="/css/data.css" />
+  </head>
+  <body>
+    <!-- Include the navbar.ejs template to display the navigation bar -->
+    <%- include('partials/navbar') %>
+    <!-- Include the tab pages -->
+    <%- include('partials/datatabs') %>
+  </body>
+</html>

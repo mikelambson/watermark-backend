@@ -1,0 +1,145 @@
+.tabContainer {
+  margin: 0;
+  width: calc(100vw - 2.5rem);
+  box-sizing: border-box;
+}
+
+.tabMenu {
+  display: flex;
+  justify-content: left;
+  width: 100vw;
+  background-color: #c9c9c9;
+  height: 35px;
+  padding: 5px;
+  font-size: large;
+  margin-left: -10px;
+  margin-bottom: 10px;
+  border-bottom: solid 2px #424242;
+}
+
+.selectorContainer {
+  display: flex;
+  justify-content: left;
+
+  /* padding-left: 2rem; */
+  padding-top: 0;
+  padding-right: 0;
+  padding-bottom: 0;
+  margin-left: 3rem;
+  margin-top: 5px;
+  margin-right: 0;
+  margin-bottom: 0;
+  width: fit-content;
+}
+
+.tabSelector {
+  background-color: #c2c2c2;
+  width: fit-content;
+  height: 20px;
+  margin-top: 5px;
+  padding: 3px 15px 5px 8px;
+  border: outset 1px #535353;
+  border-radius: 5px 20px 0 0;
+  border-bottom: 8px black;
+  color: #5a5a5a;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.tabSelector.active {
+  background-color: #ffe4c4;
+  border: outset 1px #b4a28b;
+  color: black;
+}
+
+/* Hide inactive tabs */
+.tab {
+  display: none;
+  padding-left: 1rem;
+  width: calc(100% - 1rem);
+}
+
+/* Highlight active tab */
+.active {
+  display: block;
+}
+
+table {
+  margin-top: 5px;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+/* Set the widths for the first three columns */
+th:nth-child(1),
+th:nth-child(2),
+td:nth-child(3),
+td:nth-child(4) {
+  width: 10%; /* Adjust the width as needed */
+}
+
+/* Grid design */
+
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 columns */
+  gap: 1.5rem;
+  width: 90%;
+  margin: 1rem auto;
+  font-weight: bolder;
+}
+
+.header {
+  display: flex; /* Use flexbox */
+  align-items: center; /* Vertically center items */
+  justify-content: center; /* Horizontally center items */
+  grid-column: span 3; /* Span all 3 columns */
+  text-align: center;
+  background-color: #c9c9c9;
+  height: 30px;
+  font-size: larger;
+  color: black;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: auto 1fr; /* Label and Switch */
+  align-items: center; /* Vertically center items */
+  gap: 10px;
+}
+
+.main-switch {
+  display: grid;
+  grid-template-columns: auto 1fr auto; /* Label, Switch, and Value */
+  align-items: center; /* Vertically center items */
+  gap: 10px;
+  border-bottom: 1px dotted #414141;
+  padding: 5px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.switch-value {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+  color: green;
+}
+
+/* Add any additional styling as needed */
+
+.row {
+  width: 90%;
+  margin: 0 auto;
+}

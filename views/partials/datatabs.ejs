@@ -1,0 +1,81 @@
+<!-- <h3 id="displayedTab">Data</h3> -->
+<div id="tabContainer" class="tabContainer">
+  <div id="tabMenu" class="tabMenu">
+    <div class="selectorContainer">
+      <a
+        href="#"
+        id="managementTab"
+        class="tabSelector active"
+        data-tab-target="sourceManagement"
+        >Source Management</a
+      >
+      <a href="#" id="csvTab" class="tabSelector" data-tab-target="csvSources"
+        >CSV Data</a
+      >
+      <a
+        href="#"
+        id="legacyDBtab"
+        class="tabSelector"
+        data-tab-target="legacyDatabase"
+        >Legacy Database</a
+      >
+    </div>
+  </div>
+  <!-- Start Management tab -->
+  <%- include('dataManagementTab') %>
+  <!-- Start sources tab -->
+  <%- include('dataSourcesTab') %>
+  <!-- Start legacy database tab -->
+  <%- include('dataLegacyDbTab') %>
+</div>
+<div class="footer"></div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const tabSelectors = document.querySelectorAll(".tabSelector");
+    const tabs = document.querySelectorAll(".tab");
+
+    tabSelectors.forEach((tabSelector) => {
+      tabSelector.addEventListener("click", (event) => {
+        event.preventDefault();
+
+        // Get the target tab associated with the clicked tabSelector
+        const targetTabId = tabSelector.getAttribute("data-tab-target");
+        const targetTab = document.getElementById(targetTabId);
+
+        // Hide all tabs and remove the 'active' class
+        tabs.forEach((tab) => {
+          tab.style.display = "none";
+          tabSelector.classList.remove("active");
+        });
+
+        // Show the target tab and add the 'active' class to the clicked tabSelector
+        targetTab.style.display = "block";
+        tabSelector.classList.add("active");
+      });
+    });
+  });
+  document.addEventListener("DOMContentLoaded", function () {
+    // Get all tabSelectors
+    const tabSelectors = document.querySelectorAll(".tabSelector");
+
+    // Function to handle tab clicks
+    function handleTabClick(event) {
+      // Remove the 'active' class from all tabSelectors
+      tabSelectors.forEach((tabSelector) => {
+        tabSelector.classList.remove("active");
+      });
+
+      // Add the 'active' class to the clicked tab
+      event.target.classList.add("active");
+
+      // Now you can apply any specific logic for the selected tab
+      // For example, you can show/hide tab content based on the active tab.
+    }
+
+    // Add click event listeners to all tabSelectors
+    tabSelectors.forEach((tabSelector) => {
+      tabSelector.addEventListener("click", handleTabClick);
+    });
+  });
+</script>

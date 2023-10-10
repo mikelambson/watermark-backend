@@ -1,0 +1,33 @@
+<div id="status" class="tab" style="display: block">
+  <h2>Welcome to the WaterMARK Backend Node Management System</h2>
+  Water Measurment Administration and Record Keeping
+  <hr />
+  <h3>This will display a grid tied to the system status.</h3>
+  <div class="swindow" id="statusWin" name="status" rows="15" cols="190">
+    <%= initialContent %> <span id="count"></span>
+    <div class="statuscontent" id="updatestatus"></div>
+  </div>
+</div>
+
+<script type="text/javascript">
+  const count = new EventSource("/status/events");
+  count.addEventListener("message", (message) => {
+    // console.log("Got", message);
+
+    // Display the event data in the `content` div
+    document.querySelector("#count").innerHTML = event.data;
+  });
+
+  const status = new EventSource("/status");
+  status.addEventListener("message", (event) => {
+    const statusContent = document.querySelector("#updatestatus");
+    const rawData = JSON.parse(event.data);
+    const timestamp = Object.keys(rawData)[0];
+    const message = rawData[timestamp];
+    const formattedData = `${timestamp.replace(",", " ")} || ${message}`;
+    statusContent.innerHTML += formattedData + "<br />";
+
+    // Scroll to the bottom of the element
+    statusContent.scrollTop = statusContent.scrollHeight;
+  });
+</script>

@@ -1,0 +1,33 @@
+{
+  "name": "watermark-backend",
+  "version": "1.0.0",
+  "description": "Backend for WaterMARK",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "type": "module",
+  "dependencies": {
+    "@prisma/client": "^5.3.1",
+    "cors": "^2.8.5",
+    "csurf": "*",
+    "csv-parser": "^3.0.0",
+    "dotenv": "*",
+    "ejs": "^3.1.9",
+    "exceljs": "^4.3.0",
+    "express": "*",
+    "express-session": "*",
+    "helmet": "*",
+    "jsonwebtoken": "*",
+    "node-adodb": "*",
+    "node-fetch": "^3.3.2",
+    "papaparse": "^5.4.1",
+    "passport": "*",
+    "passport-local": "*"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "prisma": "^5.3.1"
+  }
+}
