@@ -1,5 +1,7 @@
 # Ignore Development Specific Files
 *.csv
+package-lock.json
+
 
 # Ignore .env files
 *.env
