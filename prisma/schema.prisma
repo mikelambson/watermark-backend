@@ -21,7 +21,7 @@ model Users {
   protected    Boolean  @default(false)
   active       Boolean  @default(true)
   roleId       UserRoles[]
-  
+  callout      Callouts[]
 
   @@schema("auth")
 }
@@ -63,7 +63,7 @@ model LegacyOrders {
   scheduled       Boolean @default(false)
   schedule        Schedule[]
   deliveries      Deliveries[]
-  
+  callout         Callouts[]
 
   @@schema("legacy")
   @@index([status], name: "status_index")
@@ -90,7 +90,18 @@ model Schedule {
   @@index([scheduledDate])
 }
 
+model Callouts {
+  id                  Int @id @default(autoincrement())
+  callout             Boolean? @default(false)
+  calloutDone         DateTime?
+  calloutUser         String @db.Uuid
+  orderId             Int
 
+  order               LegacyOrders @relation(fields: [orderId], references: [orderNumber])
+  user                Users @relation(fields: [calloutUser], references: [id])
+
+  @@schema("ops")
+}
 
 model HeadSheets {
   id              Int @id @default(autoincrement())
@@ -113,8 +124,6 @@ model Deliveries {
   stopTime          DateTime?
   measurement       Measurements[]
   deliveryNote      String?
-
-
 
   @@schema("ops")
 }
