@@ -1,4 +1,0 @@
--- AlterTable
-ALTER TABLE "legacy"."LegacyOrders" ALTER COLUMN "phoneNumber" SET DATA TYPE TEXT,
-ALTER COLUMN "phoneNumber2" SET DATA TYPE TEXT,
-ALTER COLUMN "phoneNumber3" SET DATA TYPE TEXT;

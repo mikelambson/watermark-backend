@@ -59,17 +59,18 @@ model LegacyOrders {
   approxHrs       Float?
   phoneNumbers    String[]
   remarks         String?
-  details         Json?
+  details         Json? @db.JsonB
   scheduled       Boolean @default(false)
   schedule        Schedule[]
   deliveries      Deliveries[]
   callout         Callouts[]
 
   @@schema("legacy")
-  @@index([status], name: "status_index")
-  @@index([orderTimestamp], name: "order_timestamp_index")
-  @@index([orderNumber], name: "order_number_index")
-  @@index([tcidSn], name: "tcid_sn_index")
+  @@index([id], type:Brin, name: "order_id_index")
+  @@index([status], type: Hash, name: "status_index")
+  @@index([orderTimestamp], type:Brin, name: "order_timestamp_index")
+  @@index([orderNumber], type: Hash, name: "order_number_index")
+  @@index([tcidSn], type: Hash, name: "tcid_sn_index")
 }
 
 model Schedule {
@@ -87,7 +88,7 @@ model Schedule {
   
   @@id([orderId])
   @@schema("ops")
-  @@index([scheduledDate])
+  @@index([scheduledDate], type:Brin, name: "schedule_date_index")
 }
 
 model Callouts {
