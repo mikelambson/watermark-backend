@@ -60,7 +60,7 @@ model LegacyOrders {
   remarks         String?
   details         Json?
   scheduled       Boolean @default(false)
-  ops             Orders[]
+  ops             Schedule[]
 
   @@schema("legacy")
   @@index([status], name: "status_index")
@@ -69,7 +69,7 @@ model LegacyOrders {
   @@index([tcidSn], name: "tcid_sn_index")
 }
 
-model Orders {
+model Schedule {
   scheduledDate       DateTime
   orderId             Int
   scheduledLine       String?
