@@ -70,22 +70,22 @@ model LegacyOrders {
 }
 
 model Orders {
-  legacy          LegacyOrders @relation(fields: [orderId], references: [id])
-  orderId         Int
-  scheduledLine   String?
-  scheduledHead   Int?
-  scheduledAt     DateTime?
-  dropIn          Boolean? @default(false)
-
-
+  scheduledDate       DateTime
+  orderId             Int
+  scheduledLine       String?
+  scheduledHead       Int?
+  dropIn              Boolean? @default(false)
+  instructions        String?
+  watermasterNote     String?
+  
+  legacy              LegacyOrders @relation(fields: [orderId], references: [orderNumber])
 
   @@id([orderId])
-
   @@schema("ops")
-
+  @@index([scheduledDate])
 }
 
-model headSheet {
+model HeadSheets {
   id              Int @id @default(autoincrement())
   name            String
   maxHeads        Int
