@@ -21,6 +21,7 @@ model Users {
   protected    Boolean  @default(false)
   active       Boolean  @default(true)
   roleId       UserRoles[]
+  
 
   @@schema("auth")
 }
@@ -47,7 +48,7 @@ model UserRoles {
 }
 
 model LegacyOrders {
-  id              Int       @id @default(autoincrement())
+  id              Int @id @default(autoincrement())
   orderTimestamp  DateTime?
   orderNumber     Int @unique
   tcidSn          String?
@@ -60,7 +61,9 @@ model LegacyOrders {
   remarks         String?
   details         Json?
   scheduled       Boolean @default(false)
-  ops             Schedule[]
+  schedule        Schedule[]
+  deliveries      Deliveries[]
+  
 
   @@schema("legacy")
   @@index([status], name: "status_index")
@@ -74,28 +77,57 @@ model Schedule {
   orderId             Int
   scheduledLine       String?
   scheduledHead       Int?
+  travelTime          Int @default(0)
   dropIn              Boolean? @default(false)
   instructions        String?
-  watermasterNote     String?
+  watermasterNote     Json?
+  specialRequest      String?
   
   legacy              LegacyOrders @relation(fields: [orderId], references: [orderNumber])
-
+  
   @@id([orderId])
   @@schema("ops")
   @@index([scheduledDate])
 }
 
+
+
 model HeadSheets {
   id              Int @id @default(autoincrement())
   name            String
   maxHeads        Int
+  structureRef    String?
   maxFlow         Int?
   characteristics Json?
   
 
-
- 
-
   @@schema("ops")
 
+}
+
+model Deliveries {
+  id                Int @id @default(autoincrement())
+  scheduledOrder    LegacyOrders @relation(fields: [orderId], references: [orderNumber])
+  orderId           Int
+  startTime         DateTime
+  stopTime          DateTime?
+  measurement       Measurements[]
+  deliveryNote      String?
+
+
+
+  @@schema("ops")
+}
+
+model Measurements {
+  id                Int @id @default(autoincrement())
+  scheduledOrder    Deliveries @relation(fields: [deliveryId], references: [id])
+  deliveryId        Int
+  startTime         DateTime
+  stopTime          DateTime?
+  measurement       Int
+  measurementType   String @default("estimation")
+  measurementNote   String?
+
+  @@schema("ops")
 }
