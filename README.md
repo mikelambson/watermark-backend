@@ -8,6 +8,8 @@
 ![GitHub repo size](https://img.shields.io/github/repo-size/mikelambson/watermark-backend)
 ![GitHub package.json version](https://img.shields.io/github/package-json/v/mikelambson/watermark-backend)
 ![GitHub package.json dependency version (dev dep on branch)](https://img.shields.io/github/package-json/dependency-version/mikelambson/watermark-backend/dev/prisma/master)
+![node-current](https://img.shields.io/node/v/latest)
+
 
 
 
