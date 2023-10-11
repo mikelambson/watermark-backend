@@ -6,8 +6,10 @@
 ![GitHub language count](https://img.shields.io/github/languages/count/mikelambson/watermark-backend)
 [![Node Version](http://img.shields.io/badge/node-0.10.x-brightgreen.svg)](https://github.com/nodejs/node)
 ![GitHub repo size](https://img.shields.io/github/repo-size/mikelambson/watermark-backend)
-
 ![GitHub package.json version](https://img.shields.io/github/package-json/v/mikelambson/watermark-backend)
+![GitHub package.json dependency version (dev dep on branch)](https://img.shields.io/github/package-json/dependency-version/mikelambson/watermark-backend/dev/prisma/master)
+
+
 
 ___
 #### Information
@@ -18,6 +20,7 @@ WaterMARK is a multi-source meter data aggregation, scheduling, task managemet a
 ___
 #### API Method
 
-/api/dataSource?find:column=parameter>parameterRangeIndicator
+API pattern:
+>/api/dataSource?find:column=parameter>parameterRangeIndicator&find:anothercolumn=x,y,z
 
 
