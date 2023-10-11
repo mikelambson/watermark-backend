@@ -4,10 +4,10 @@ const prisma = new PrismaClient();
 
 async function updateScheduled() {
   try {
-    // Query for LegacyOrders where adjust is not "O"
+    // Query for LegacyOrders where status is not "O"
     const legacyOrdersToUpdate = await prisma.legacyOrders.findMany({
       where: {
-        adjust: {
+        status: {
           not: 'O',
         },
       },
