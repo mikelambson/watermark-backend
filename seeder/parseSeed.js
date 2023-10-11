@@ -62,25 +62,29 @@ async function main() {
             if (!isNaN(orderTimestamp.getTime())) {
               const transformedRow = {
                 orderTimestamp,
-                irrigatorsName: row["Irrigator's Name"],
-                ownersName: row["Owner's Name"],
-                name: row.NAME,
-                phoneNumber: row.PHONE_NO,     // Phone numbers as strings
-                phoneNumber2: row.Phone_NO_2,  // Phone numbers as strings
-                phoneNumber3: row.Phone_NO_3,  // Phone numbers as strings
-                lateral1: row["LATERAL 1"],
-                lateral2: row["LATERAL 2"],
-                lateral3: row["LATERAL 3"],
-                lateral4: row["LATERAL 4"],
-                approxCfs: parseFloat(row.APPROX_CFS),
-                approxHrs: parseFloat(row.APPROX_HRS),
                 orderNumber,
                 tcidSn: row.TCID_SN,
-                remarks: row.REMARKS,
-                approxAf: parseFloat(row.APPROX_AF),
-                balance: parseFloat(row.Balance),
                 district: row.DISTRICT,
-                adjust: row.ADJUST,
+                status: row.ADJUST,
+                laterals: [row["LATERAL 1"], row["LATERAL 2"], row["LATERAL 3"], row["LATERAL 4"]].filter(Boolean), // Combine laterals into an array
+                approxCfs: parseFloat(row.APPROX_CFS),
+                approxHrs: parseFloat(row.APPROX_HRS),
+                phoneNumbers: [row.PHONE_NO, row.Phone_NO_2, row.Phone_NO_3].filter(Boolean), // Combine 
+                remarks: row.REMARKS,
+                details: {
+                  irrigatorsName: row["Irrigator's Name"],
+                  ownersName: row["Owner's Name"],
+                  name: row.NAME,
+                  approxAf: parseFloat(row.APPROX_AF),
+                  balance: parseFloat(row.Balance),
+                }
+                // phoneNumber: row.PHONE_NO,     // Phone numbers as strings
+                // phoneNumber2: row.Phone_NO_2,  // Phone numbers as strings
+                // phoneNumber3: row.Phone_NO_3,  // Phone numbers as strings
+                // lateral1: row["LATERAL 1"],
+                // lateral2: row["LATERAL 2"],
+                // lateral3: row["LATERAL 3"],
+                // lateral4: row["LATERAL 4"],
               };
 
               // Insert the transformed row into the database

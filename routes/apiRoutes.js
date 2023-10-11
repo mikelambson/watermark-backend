@@ -124,7 +124,7 @@ api.get('/legacyorders', async (req, res) => {
           // Split the 'val' into individual status values based on the specified character (or '&')
           const statusValues = val.split(','); // Use a comma as a separator, change it to your preferred character if needed
           // Use 'IN' Prisma filter to match any of the status values
-          filter.adjust = {
+          filter.status = {
             in: statusValues,
             mode: 'insensitive',
           };
@@ -204,7 +204,7 @@ api.get('/legacyorders/:status', async (req, res) => {
   // Iterate through the provided statuses and build the filter object
   statuses.forEach((status) => {
     const filterCondition = {
-      adjust: {
+      status: {
         contains: status,
         mode: 'insensitive',
       },

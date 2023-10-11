@@ -9,7 +9,7 @@
   },
   "type": "module",
   "dependencies": {
-    "@prisma/client": "^5.3.1",
+    "@prisma/client": "^5.4.2",
     "cors": "^2.8.5",
     "csurf": "*",
     "csv-parser": "^3.0.0",
@@ -28,6 +28,6 @@
   },
   "devDependencies": {
     "nodemon": "^3.0.1",
-    "prisma": "^5.3.1"
+    "prisma": "^5.4.2"
   }
 }

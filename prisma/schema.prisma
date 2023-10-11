@@ -49,30 +49,53 @@ model UserRoles {
 model LegacyOrders {
   id              Int       @id @default(autoincrement())
   orderTimestamp  DateTime?
-  irrigatorsName  String?
-  ownersName      String?
-  name            String?
-  phoneNumber     String?
-  phoneNumber2    String?
-  phoneNumber3    String?
-  lateral1        String
-  lateral2        String?
-  lateral3        String?
-  lateral4        String?
+  orderNumber     Int @unique
+  tcidSn          String?
+  district        String?
+  status          String?
+  laterals        String[]
   approxCfs       Float?
   approxHrs       Float?
-  orderNumber     Int @unique
-  tcidSn          String
+  phoneNumbers    String[]
   remarks         String?
-  approxAf        Float?
-  balance         Float?
-  district        String?
-  adjust          String
+  details         Json?
   scheduled       Boolean @default(false)
+  ops             Orders[]
 
   @@schema("legacy")
-  @@index([adjust], name: "adjust_index")
+  @@index([status], name: "status_index")
   @@index([orderTimestamp], name: "order_timestamp_index")
   @@index([orderNumber], name: "order_number_index")
   @@index([tcidSn], name: "tcid_sn_index")
+}
+
+model Orders {
+  legacy          LegacyOrders @relation(fields: [orderId], references: [id])
+  orderId         Int
+  scheduledLine   String?
+  scheduledHead   Int?
+  scheduledAt     DateTime?
+  dropIn          Boolean? @default(false)
+
+
+
+  @@id([orderId])
+
+  @@schema("ops")
+
+}
+
+model headSheet {
+  id              Int @id @default(autoincrement())
+  name            String
+  maxHeads        Int
+  maxFlow         Int?
+  characteristics Json?
+  
+
+
+ 
+
+  @@schema("ops")
+
 }
