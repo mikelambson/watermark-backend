@@ -8,9 +8,8 @@
 ![GitHub package.json version](https://img.shields.io/github/package-json/v/mikelambson/watermark-backend)
 ![GitHub package.json dependency version (dev dep on branch)](https://img.shields.io/github/package-json/dependency-version/mikelambson/watermark-backend/dev/prisma/master)
 ![node-current](https://img.shields.io/node/v/latest)
-
-
-
+![Static Badge](https://img.shields.io/badge/DBMS-PostgreSQL-%23336791)
+![Static Badge](https://img.shields.io/badge/DBMS_Extension-TimescaleDB-%23f5ff80)
 
 ___
 #### Information
@@ -23,5 +22,7 @@ ___
 
 API pattern:
 >/api/dataSource?find:column=parameter>parameterRangeIndicator&find:anothercolumn=x,y,z
+
+We begin the route query with the `?find` operator followed by the initial query parameter which is generally a column ref `=` a value.  This is extended when we add incorporate the data aspect into the lookup to allow for a singular date or a range via the `>` key.
 
 
