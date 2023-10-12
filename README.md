@@ -21,7 +21,7 @@ ___
 #### API Method
 
 API pattern:
->/api/dataSource?find:column=parameter>parameterRangeIndicator&find:anothercolumn=x,y,z
+`/api/dataSource?find:column=parameter>parameterRangeIndicator&find:anothercolumn=x,y,z`
 
 We begin the route query with the `?find:` operator followed by the initial query parameter which is generally a column ref `=` a value.  This is extended when we add incorporate the data aspect into the lookup to allow for a singular date or a range via the `>` key.
 
