@@ -25,4 +25,5 @@ API pattern:
 
 We begin the route query with the `?find:` operator followed by the initial query parameter which is generally a column ref `=` a value.  This is extended when we add incorporate the data aspect into the lookup to allow for a singular date or a range via the `>` key.
 
-
+These `find:column=value` methods can be chained via `&`.
+For multiple values from the same column we can separate using `,`.
