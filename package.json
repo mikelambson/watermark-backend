@@ -6,7 +6,11 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "clean": "npm prune",
+    "rebuild": "npm ci",
+    "git": "git add --all && git commit -m \"Update Code\" && git push"
+
   },
   "type": "module",
   "dependencies": {
