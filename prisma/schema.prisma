@@ -6,7 +6,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  schemas  = ["config", "auth",  "legacy", "maint", "ops", "analysis", "public", "timeseries"]
+  schemas  = ["config", "auth",  "master", "maint", "ops", "analysis", "public", "timeseries"]
   extensions = [pgcrypto]
 }
 
@@ -47,9 +47,8 @@ model UserRoles {
   @@schema("auth")
 }
 
-model LegacyOrders {
-  id              Int @id @default(autoincrement())
-  orderTimestamp  DateTime?
+model Orders {
+  orderTimestamp  DateTime
   orderNumber     Int @unique
   tcidSn          String?
   district        String?
@@ -60,13 +59,12 @@ model LegacyOrders {
   phoneNumbers    String[]
   remarks         String?
   details         Json? @db.JsonB
-  scheduled       Boolean @default(false)
   schedule        Schedule[]
   deliveries      Deliveries[]
   callout         Callouts[]
 
-  @@schema("legacy")
-  @@index([id], type:Brin, name: "order_id_index")
+  @@id([orderTimestamp, orderNumber])
+  @@schema("timeseries")
   @@index([status], type: Hash, name: "status_index")
   @@index([orderTimestamp], type:Brin, name: "order_timestamp_index")
   @@index([orderNumber], type: Hash, name: "order_number_index")
@@ -84,7 +82,7 @@ model Schedule {
   watermasterNote     Json?
   specialRequest      String?
   
-  legacy              LegacyOrders @relation(fields: [orderId], references: [orderNumber])
+  orders              Orders @relation(fields: [orderId], references: [orderNumber])
   
   @@id([orderId])
   @@schema("ops")
@@ -98,7 +96,7 @@ model Callouts {
   calloutUser         String @db.Uuid
   orderId             Int
 
-  order               LegacyOrders @relation(fields: [orderId], references: [orderNumber])
+  order               Orders @relation(fields: [orderId], references: [orderNumber])
   user                Users @relation(fields: [calloutUser], references: [id])
 
   @@schema("ops")
@@ -119,7 +117,7 @@ model HeadSheets {
 
 model Deliveries {
   id                Int @id @default(autoincrement())
-  scheduledOrder    LegacyOrders @relation(fields: [orderId], references: [orderNumber])
+  scheduledOrder    Orders @relation(fields: [orderId], references: [orderNumber])
   orderId           Int
   startTime         DateTime
   stopTime          DateTime?

@@ -4,8 +4,8 @@ const prisma = new PrismaClient();
 
 async function updateScheduled() {
   try {
-    // Query for LegacyOrders where status is not "O"
-    const legacyOrdersToUpdate = await prisma.legacyOrders.findMany({
+    // Query for Orders where status is not "O"
+    const ordersToUpdate = await prisma.Orders.findMany({
       where: {
         status: {
           not: 'O',
@@ -14,10 +14,10 @@ async function updateScheduled() {
     });
 
     // Update the scheduled field to true for each record
-    const updatePromises = legacyOrdersToUpdate.map((legacyOrder) => {
-      return prisma.legacyOrders.update({
+    const updatePromises = ordersToUpdate.map((order) => {
+      return prisma.Orders.update({
         where: {
-          id: legacyOrder.id, // Assuming you have an id field
+          id: order.id, // Assuming you have an id field
         },
         data: {
           scheduled: true,
@@ -28,9 +28,9 @@ async function updateScheduled() {
     // Execute all the update queries
     await Promise.all(updatePromises);
 
-    console.log('LegacyOrders updated successfully.');
+    console.log('Orders updated successfully.');
   } catch (error) {
-    console.error('Error updating LegacyOrders:', error);
+    console.error('Error updating Orders:', error);
   } finally {
     await prisma.$disconnect();
   }

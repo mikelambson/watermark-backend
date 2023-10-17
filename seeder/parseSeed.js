@@ -33,14 +33,14 @@ async function main() {
           // Check if the order number is missing or invalid
           if (isNaN(orderNumber)) {
             // Log the error for a missing or invalid orderNumber
-            console.error('Invalid `prisma.legacyOrders.findUnique()` invocation:');
+            console.error('Invalid `prisma.Orders.findUnique()` invocation:');
             console.error('{\n  where: {\n    orderNumber: Int\n  }\n}\n\nArgument `orderNumber` is missing.');
             missingOrderNumberErrors++;
             continue;
           }
 
           // Check if the order number already exists in the database
-          const existingOrder = await prisma.legacyOrders.findUnique({
+          const existingOrder = await prisma.Orders.findUnique({
             where: { orderNumber },
           });
 
@@ -88,7 +88,7 @@ async function main() {
               };
 
               // Insert the transformed row into the database
-              await prisma.legacyOrders.create({
+              await prisma.Orders.create({
                 data: transformedRow,
               });
               rowsInserted++; // Update the count of successful rows inserted

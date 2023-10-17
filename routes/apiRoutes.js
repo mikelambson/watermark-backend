@@ -59,9 +59,9 @@ api.get("/status", async (req, res) => {
   res.json(statusInfo);
 });
 
-/////////////////////////// LegacyOrders /////////////////////////
-// LegacyOrders route query handler
-api.get('/legacyorders', async (req, res) => {
+/////////////////////////// Orders /////////////////////////
+// Orders route query handler
+api.get('/orders', async (req, res) => {
   updateLogData("Data Req");
   try {
     const queryParameters = req.query;
@@ -158,7 +158,7 @@ api.get('/legacyorders', async (req, res) => {
       const skip = (pageInt - 1) * pageSizeInt;
 
       // Add skip and take (pageSize) options to the query
-      const orders = await prisma.legacyOrders.findMany({
+      const orders = await prisma.Orders.findMany({
         where: filter,
         skip,
         take: pageSizeInt,
@@ -173,7 +173,7 @@ api.get('/legacyorders', async (req, res) => {
       res.json(formattedOrders);
     } else {
       // If page and pageSize are not provided, return all results
-      const orders = await prisma.legacyOrders.findMany({
+      const orders = await prisma.Orders.findMany({
         where: filter,
       });
 
@@ -194,7 +194,7 @@ api.get('/legacyorders', async (req, res) => {
 
 ///////////////////////////////////// Status ////////////////////////////////////////////////
 
-api.get('/legacyorders/:status', async (req, res) => {
+api.get('/orders/:status', async (req, res) => {
   const { status } = req.params;
   const statuses = status.split('&');
 
@@ -221,7 +221,7 @@ api.get('/legacyorders/:status', async (req, res) => {
 
   try {
     // Retrieve and return filtered orders using Prisma
-    const orders = await prisma.legacyOrders.findMany({
+    const orders = await prisma.Orders.findMany({
       where: whereCondition,
     });
 
