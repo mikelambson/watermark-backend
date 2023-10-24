@@ -78,13 +78,6 @@ async function main() {
                   approxAf: parseFloat(row.APPROX_AF),
                   balance: parseFloat(row.Balance),
                 }
-                // phoneNumber: row.PHONE_NO,     // Phone numbers as strings
-                // phoneNumber2: row.Phone_NO_2,  // Phone numbers as strings
-                // phoneNumber3: row.Phone_NO_3,  // Phone numbers as strings
-                // lateral1: row["LATERAL 1"],
-                // lateral2: row["LATERAL 2"],
-                // lateral3: row["LATERAL 3"],
-                // lateral4: row["LATERAL 4"],
               };
 
               // Insert the transformed row into the database

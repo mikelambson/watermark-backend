@@ -309,6 +309,7 @@ api.put('/orders/:orderNumber/:year?', async (req, res) => {
 
 ////////////////////////////// Schedule ////////////////////////////////////////
 
+// Schedule: GET
 api.get('/schedule', async (req, res) => {
   try {
     // Step 1: Select Order Numbers from Current Year
@@ -316,8 +317,8 @@ api.get('/schedule', async (req, res) => {
     const orders = await prisma.orders.findMany({
       where: {
         orderTimestamp: {
-          gte: new Date(`${currentYear}-01-01`),
-          lte: new Date(`${currentYear}-12-31T23:59:59`),
+          gte: new Date(`${currentYear}-01-01T00:00:00Z`),
+          lte: new Date(`${currentYear}-12-31T23:59:59Z`),
         },
       },
     });
@@ -340,8 +341,14 @@ api.get('/schedule', async (req, res) => {
       ? filteredByLine.filter((order) => (dropIn === 'true' ? !order.scheduledHead : order.scheduledHead === scheduledHead))
       : filteredByLine;
 
+    // Convert timestamps to local time before sending the response
+    const formattedSchedules = filteredByHead.map((schedule) => ({
+      ...schedule,
+      scheduledDate: formatDateToPDT(new Date(schedule.scheduledDate.getTime() + pdtOffset)),
+    }));
+
     // Return the final filtered schedules
-    res.json(filteredByHead);
+    res.json(formattedSchedules);
   } catch (error) {
     console.error('Error fetching schedules:', error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -350,15 +357,20 @@ api.get('/schedule', async (req, res) => {
 
 ////////////// Schedule: POST
 
+// Schedule: POST
 api.post('/schedule', async (req, res) => {
   try {
     const { orderId, scheduledDate, scheduledLine, scheduledHead, travelTime, dropIn, instructions, watermasterNote, specialRequest } = req.body;
 
-    // Create a new schedule entry
+    // Convert scheduledDate to UTC before storing in the database
+    const utcScheduledDate = new Date(scheduledDate);
+    // Apply PDT offset
+    utcScheduledDate.setTime(utcScheduledDate.getTime() + pdtOffset);
+
     const newSchedule = await prisma.schedule.create({
       data: {
         orderId,
-        scheduledDate,
+        scheduledDate: utcScheduledDate,
         scheduledLine,
         scheduledHead,
         travelTime,
@@ -379,19 +391,24 @@ api.post('/schedule', async (req, res) => {
 
 //////////////// Schedule: PUT
 
+// Schedule: PUT
 api.put('/schedule/:scheduleId', async (req, res) => {
   const { scheduleId } = req.params;
 
   try {
     const { scheduledDate, scheduledLine, scheduledHead, travelTime, dropIn, instructions, watermasterNote, specialRequest } = req.body;
 
-    // Update the schedule entry by scheduleId
+    // Convert scheduledDate to UTC before updating in the database
+    const utcScheduledDate = new Date(scheduledDate);
+    // Apply PDT offset
+    utcScheduledDate.setTime(utcScheduledDate.getTime() + pdtOffset);
+
     const updatedSchedule = await prisma.schedule.update({
       where: {
         id: parseInt(scheduleId),
       },
       data: {
-        scheduledDate,
+        scheduledDate: utcScheduledDate,
         scheduledLine,
         scheduledHead,
         travelTime,
@@ -409,7 +426,121 @@ api.put('/schedule/:scheduleId', async (req, res) => {
   }
 });
 
+/////////////////////////// HeadSheets //////////////////////////////////////
 
+// GET all HeadSheets
+api.get('/headsheets', async (req, res) => {
+  try {
+    const headsheets = await prisma.headSheets.findMany();
+    res.json(headsheets);
+  } catch (error) {
+    console.error('Error fetching HeadSheets:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// GET HeadSheets by district
+api.get('/headsheets/:district', async (req, res) => {
+  const { district } = req.params;
+  try {
+    const headsheets = await prisma.headSheets.findMany({
+      where: {
+        district: district,
+      },
+    });
+    if (headsheets.length === 0) {
+      return res.status(404).json({ error: 'HeadSheets not found for the specified district' });
+    }
+    res.json(headsheets);
+  } catch (error) {
+    console.error('Error fetching HeadSheets:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+// GET a specific HeadSheets by ID
+api.get('/headsheets/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const headsheet = await prisma.headSheets.findUnique({
+      where: {
+        id: parseInt(id),
+      },
+    });
+    if (!headsheet) {
+      return res.status(404).json({ error: 'HeadSheet not found' });
+    }
+    res.json(headsheet);
+  } catch (error) {
+    console.error('Error fetching HeadSheet:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// POST a new HeadSheets
+api.post('/headsheets', async (req, res) => {
+  const { name, district, maxHeads, structureRef, maxFlow, characteristics } = req.body;
+  try {
+    const newHeadSheet = await prisma.headSheets.create({
+      data: {
+        name,
+        district,
+        maxHeads,
+        structureRef,
+        maxFlow,
+        characteristics: JSON.parse(characteristics), // Assuming characteristics is received as a JSON string
+      },
+    });
+    res.json(newHeadSheet);
+  } catch (error) {
+    console.error('Error creating HeadSheet:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// PUT update an existing HeadSheets by ID
+api.put('/headsheets/:id', async (req, res) => {
+  const { id } = req.params;
+  const { name, district, maxHeads, structureRef, maxFlow, characteristics } = req.body;
+  try {
+    const updatedHeadSheet = await prisma.headSheets.update({
+      where: {
+        id: parseInt(id),
+      },
+      data: {
+        name,
+        district,
+        maxHeads,
+        structureRef,
+        maxFlow,
+        characteristics: JSON.parse(characteristics), // Assuming characteristics is received as a JSON string
+      },
+    });
+    res.json(updatedHeadSheet);
+  } catch (error) {
+    console.error('Error updating HeadSheet:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// DELETE a HeadSheets by ID
+api.delete('/headsheets/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const deletedHeadSheet = await prisma.headSheets.delete({
+      where: {
+        id: parseInt(id),
+      },
+    });
+    res.json(deletedHeadSheet);
+  } catch (error) {
+    console.error('Error deleting HeadSheet:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+/////////////////////////// Deliveries //////////////////////////////////////
 
 
 export default api;
