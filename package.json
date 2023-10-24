@@ -10,11 +10,10 @@
     "clean": "npm prune",
     "rebuild": "npm ci",
     "git": "git add --all && git commit -m \"Update Code\" && git push"
-
   },
   "type": "module",
   "dependencies": {
-    "@prisma/client": "^5.4.2",
+    "@prisma/client": "^5.5.0",
     "cors": "^2.8.5",
     "csurf": "*",
     "csv-parser": "^3.0.0",
@@ -33,6 +32,6 @@
   },
   "devDependencies": {
     "nodemon": "^3.0.1",
-    "prisma": "^5.4.2"
+    "prisma": "^5.5.0"
   }
 }

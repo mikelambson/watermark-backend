@@ -48,7 +48,7 @@ model UserRoles {
 }
 
 model Orders {
-  id              Int @id @default(autoincrement()) @unique
+  id              Int @id @default(autoincrement())
   orderTimestamp  DateTime
   orderNumber     Int
   tcidSn          String?
@@ -75,10 +75,10 @@ model Orders {
 model Schedule {
   scheduledDate       DateTime
   orderId             Int
-  scheduledLine       String?
+  scheduledLine       String
   scheduledHead       Int?
   travelTime          Int @default(0)
-  dropIn              Boolean? @default(false)
+  dropIn              Boolean @default(false)
   instructions        String?
   watermasterNote     Json?
   specialRequest      String?

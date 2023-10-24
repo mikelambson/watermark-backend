@@ -199,7 +199,7 @@ api.get('/orders', async (req, res) => {
 });
 
 
-///////////////////////////////////// Status ////////////////////////////////////////////////
+//////////// Order: Status 
 
 api.get('/orders/:status', async (req, res) => {
   const { status } = req.params;
@@ -250,7 +250,7 @@ api.get('/orders/:status', async (req, res) => {
 });
 
 
-//////////////////////////// Put Functions /////////////////////////////////////
+/////////// Orders: Put Functions 
 
 api.put('/orders/:orderNumber/:year?', async (req, res) => {
   const { year, orderNumber } = req.params;
@@ -306,6 +306,108 @@ api.put('/orders/:orderNumber/:year?', async (req, res) => {
   }
 });
 
+
+////////////////////////////// Schedule ////////////////////////////////////////
+
+api.get('/schedule', async (req, res) => {
+  try {
+    // Step 1: Select Order Numbers from Current Year
+    const currentYear = new Date().getFullYear();
+    const orders = await prisma.orders.findMany({
+      where: {
+        orderTimestamp: {
+          gte: new Date(`${currentYear}-01-01`),
+          lte: new Date(`${currentYear}-12-31T23:59:59`),
+        },
+      },
+    });
+
+    // Step 2: Filter by Specific District
+    const { district } = req.query;
+    const filteredByDistrict = district
+      ? orders.filter((order) => order.district === district)
+      : orders;
+
+    // Step 3: Filter by Scheduled Line
+    const { scheduledLine } = req.query;
+    const filteredByLine = scheduledLine
+      ? filteredByDistrict.filter((order) => order.scheduledLine === scheduledLine)
+      : filteredByDistrict;
+
+    // Step 4: Filter by Scheduled Head (with Drop-In Check)
+    const { scheduledHead, dropIn } = req.query;
+    const filteredByHead = scheduledHead
+      ? filteredByLine.filter((order) => (dropIn === 'true' ? !order.scheduledHead : order.scheduledHead === scheduledHead))
+      : filteredByLine;
+
+    // Return the final filtered schedules
+    res.json(filteredByHead);
+  } catch (error) {
+    console.error('Error fetching schedules:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+////////////// Schedule: POST
+
+api.post('/schedule', async (req, res) => {
+  try {
+    const { orderId, scheduledDate, scheduledLine, scheduledHead, travelTime, dropIn, instructions, watermasterNote, specialRequest } = req.body;
+
+    // Create a new schedule entry
+    const newSchedule = await prisma.schedule.create({
+      data: {
+        orderId,
+        scheduledDate,
+        scheduledLine,
+        scheduledHead,
+        travelTime,
+        dropIn,
+        instructions,
+        watermasterNote,
+        specialRequest,
+      },
+    });
+
+    res.json(newSchedule);
+  } catch (error) {
+    console.error('Error creating schedule:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+//////////////// Schedule: PUT
+
+api.put('/schedule/:scheduleId', async (req, res) => {
+  const { scheduleId } = req.params;
+
+  try {
+    const { scheduledDate, scheduledLine, scheduledHead, travelTime, dropIn, instructions, watermasterNote, specialRequest } = req.body;
+
+    // Update the schedule entry by scheduleId
+    const updatedSchedule = await prisma.schedule.update({
+      where: {
+        id: parseInt(scheduleId),
+      },
+      data: {
+        scheduledDate,
+        scheduledLine,
+        scheduledHead,
+        travelTime,
+        dropIn,
+        instructions,
+        watermasterNote,
+        specialRequest,
+      },
+    });
+
+    res.json(updatedSchedule);
+  } catch (error) {
+    console.error('Error updating schedule:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 
 
