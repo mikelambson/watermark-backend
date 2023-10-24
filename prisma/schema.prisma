@@ -48,8 +48,9 @@ model UserRoles {
 }
 
 model Orders {
+  id              Int @id @default(autoincrement()) @unique
   orderTimestamp  DateTime
-  orderNumber     Int @unique
+  orderNumber     Int
   tcidSn          String?
   district        String?
   status          String?
@@ -63,7 +64,7 @@ model Orders {
   deliveries      Deliveries[]
   callout         Callouts[]
 
-  @@id([orderTimestamp, orderNumber])
+  
   @@schema("timeseries")
   @@index([status], type: Hash, name: "status_index")
   @@index([orderTimestamp], type:Brin, name: "order_timestamp_index")
@@ -82,7 +83,7 @@ model Schedule {
   watermasterNote     Json?
   specialRequest      String?
   
-  orders              Orders @relation(fields: [orderId], references: [orderNumber])
+  orders              Orders @relation(fields: [orderId], references: [id])
   
   @@id([orderId])
   @@schema("ops")
@@ -96,7 +97,7 @@ model Callouts {
   calloutUser         String @db.Uuid
   orderId             Int
 
-  order               Orders @relation(fields: [orderId], references: [orderNumber])
+  order               Orders @relation(fields: [orderId], references: [id])
   user                Users @relation(fields: [calloutUser], references: [id])
 
   @@schema("ops")
@@ -117,7 +118,7 @@ model HeadSheets {
 
 model Deliveries {
   id                Int @id @default(autoincrement())
-  scheduledOrder    Orders @relation(fields: [orderId], references: [orderNumber])
+  scheduledOrder    Orders @relation(fields: [orderId], references: [id])
   orderId           Int
   startTime         DateTime
   stopTime          DateTime?

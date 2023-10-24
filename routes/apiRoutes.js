@@ -89,37 +89,35 @@ api.get('/orders', async (req, res) => {
           const serialValues = val.split(',');
           filter.tcidSn = {in: serialValues};
           break;
-        case 'date':
-          // Example queries: ?find:date=2023-09-01>2023-09-30 or ?find:date=2023-09-01
-          // Split the 'val' into start and end dates if it contains '>'
-          const dateRangePattern = /^(\d{4}-\d{2}-\d{2})>(\d{4}-\d{2}-\d{2})$/;
-          const dateMatch = val.match(dateRangePattern);
-          
-
-          if (dateMatch) {
-            // Date range is provided
-            const [, startDate, endDate] = dateMatch;
-
-
-             // Convert the 'val' query parameter to a Date object, and add the PDT offset
-            filter.orderTimestamp = {
-              gte: new Date(new Date(startDate).getTime() + pdtOffset),
-              lte: new Date(new Date(endDate).getTime() + pdtOffset),
-              // gte stands for "greater than or equal to," and it is used to specify the lower bound of the date range. In the context of a date filter, it means that the date should be greater than or equal to the specified value.
-              // lte stands for "less than or equal to," and it is used to specify the upper bound of the date range. In the context of a date filter, it means that the date should be less than or equal to the specified value.
-            };
-          } else {
-            // Single date is provided
-            // Validate the date format, e.g., using a regular expression
-            const datePattern = /^\d{4}-\d{2}-\d{2}$/;
-            if (!datePattern.test(val)) {
-              throw new Error('Invalid date format');
+          case 'date':
+            // Example queries: ?find:date=2023-09-01>2023-09-30 or ?find:date=2023-09-01
+            // Split the 'val' into start and end dates if it contains '>'
+            const dateRangePattern = /^(\d{4}-\d{2}-\d{2})>(\d{4}-\d{2}-\d{2})$/;
+            const dateMatch = val.match(dateRangePattern);
+      
+            // If date range is provided, convert it to Date objects and apply PDT offset
+            if (dateMatch) {
+              const [, startDate, endDate] = dateMatch;
+              filter.orderTimestamp = {
+                gte: new Date(new Date(startDate).getTime() + pdtOffset),
+                lte: new Date(new Date(endDate).getTime() + pdtOffset),
+              };
+            } else {
+              // Single date is provided or no date is provided (defaults to current year)
+              const parsedDate = new Date(val);
+              if (isNaN(parsedDate)) {
+                // If no valid date is provided, default to the current year
+                const currentYear = new Date().getFullYear();
+                filter.orderTimestamp = {
+                  gte: new Date(`${currentYear}-01-01T00:00:00Z`),
+                  lte: new Date(`${currentYear}-12-31T23:59:59Z`),
+                };
+              } else {
+                // If a valid single date is provided, use it for filtering
+                filter.orderTimestamp = new Date(parsedDate.getTime() + pdtOffset);
+              }
             }
-
-            // Convert the 'val' query parameter to a Date object and add the PDT offset
-            filter.orderTimestamp = new Date(new Date(val).getTime() + pdtOffset);
-          }
-          break;
+            break;
         case 'status':
           // Split the 'val' into individual status values based on the specified character (or '&')
           const statusValues = val.split(','); // Use a comma as a separator, change it to your preferred character if needed
@@ -217,6 +215,10 @@ api.get('/orders/:status', async (req, res) => {
         contains: status,
         mode: 'insensitive',
       },
+      orderTimestamp: {
+        gte: new Date(`${new Date().getFullYear()}-01-01T00:00:00Z`),  // Start of the current year
+        lte: new Date(`${new Date().getFullYear()}-12-31T23:59:59Z`),  // End of the current year
+      },
     };
     positiveFilters.push(filterCondition);
   });
@@ -248,9 +250,61 @@ api.get('/orders/:status', async (req, res) => {
 });
 
 
+//////////////////////////// Put Functions /////////////////////////////////////
 
+api.put('/orders/:orderNumber/:year?', async (req, res) => {
+  const { year, orderNumber } = req.params;
+  const { newStatus } = req.body;
 
+  // If year is not provided, default to the current year
+  const currentYear = year || new Date().getFullYear().toString();
 
+  try {
+    // Retrieve the order by orderId and year from the database
+    const order = await prisma.orders.findMany({
+      where: {
+        AND: [
+          { orderNumber: parseInt(orderNumber) },
+          {
+            orderTimestamp: {
+              gte: new Date(`${currentYear}-01-01T00:00:00Z`),  // Start of the specified year
+              lte: new Date(`${currentYear}-12-31T23:59:59Z`),  // End of the specified year
+            },
+          },
+        ],
+      },
+    });
+
+    // If the order does not exist, return a 404 Not Found response
+    if (!order || order.length === 0) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    // Update the order status with the newStatus provided in the request body
+    const updatedOrder = await prisma.orders.updateMany({
+      where: {
+        AND: [
+          { orderNumber: parseInt(orderNumber) },
+          {
+            orderTimestamp: {
+              gte: new Date(`${currentYear}-01-01T00:00:00Z`),  // Start of the specified year
+              lte: new Date(`${currentYear}-12-31T23:59:59Z`),  // End of the specified year
+            },
+          },
+        ],
+      },
+      data: {
+        status: newStatus,
+      },
+    });
+
+    // Return the updated order as the response
+    res.json(updatedOrder);
+  } catch (error) {
+    console.error('Error updating order status:', error);
+    res.status(500).json({ error: 'Internal Server Error', details: error.message });
+  }
+});
 
 
 
