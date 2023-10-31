@@ -60,16 +60,24 @@ model Orders {
   phoneNumbers    String[]
   remarks         String?
   details         Json? @db.JsonB
+  
+  // SQL Schema Setup
+  @@schema("timeseries")
+  @@unique([orderTimestamp, orderNumber])
+  
+  //Indexes
+  @@index([orderTimestamp], type:Brin, name: "order_timestamp_index")
+  @@index([status], type: Hash, name: "status_index")
+  @@index([orderNumber], type: Hash, name: "order_number_index")
+  @@index([tcidSn], type: Hash, name: "tcid_sn_index")
+  @@index([orderNumber, orderTimestamp], type:Brin , name: "order_number_timestamp_index")
+  @@index([status, orderTimestamp], type:Brin , name: "order_status_timestamp_index")
+
+  //Relations
   schedule        Schedule[]
   deliveries      Deliveries[]
   callout         Callouts[]
 
-  
-  @@schema("timeseries")
-  @@index([status], type: Hash, name: "status_index")
-  @@index([orderTimestamp], type:Brin, name: "order_timestamp_index")
-  @@index([orderNumber], type: Hash, name: "order_number_index")
-  @@index([tcidSn], type: Hash, name: "tcid_sn_index")
 }
 
 model Schedule {
