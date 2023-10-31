@@ -1,0 +1,28 @@
+{
+    "HeadSheets": [
+      { "name": "T", "district": "WE", "maxHeads": 6 },
+      { "name": "N", "district": "WE", "maxHeads": 2 },
+      { "name": "VAE", "district": "WE", "maxHeads": 6 },
+      { "name": "A", "district": "CE", "maxHeads": 6 },
+      { "name": "G", "district": "CE", "maxHeads": 3 },
+      { "name": "L1", "district": "CE", "maxHeads": 6 },
+      { "name": "L", "district": "CE", "maxHeads": 6 },
+      { "name": "NDOW", "district": "CE", "maxHeads": 3 },
+      { "name": "VDS", "district": "EA", "maxHeads": 6 },
+      { "name": "S", "district": "EA", "maxHeads": 6 },
+      { "name": "RE", "district": "EA", "maxHeads": 3 },
+      { "name": "ST", "district": "EA", "maxHeads": 6 },
+      { "name": "USFW", "district": "EA", "maxHeads": 3 },
+      { "name": "CANVAS", "district": "EA", "maxHeads": 3 },
+      { "name": "TC", "district": "TC", "maxHeads": 6 },
+      { "name": "HAZEN", "district": "TC", "maxHeads": 2 },
+      { "name": "BENCH", "district": "TC", "maxHeads": 2 },
+      { "name": "RD", "district": "TC", "maxHeads": 1 }
+    ],
+    "dummyTable": [
+      { "field1": "value1", "field2": "value2" },
+      { "field1": "value3", "field2": "value4" }
+      
+    ]
+  }
+  
