@@ -150,3 +150,17 @@ model Measurements {
 
   @@schema("ops")
 }
+
+model OperationalFlows {
+  id                Int @id @default(autoincrement())
+  name              String
+  type              String
+  remoteSource      String?
+  remoteValue       Float?
+  remoteTimestamp   DateTime?
+  override          Boolean @default(false)
+  manualValue       Float?
+  manualTimestamp   DateTime?
+
+  @@schema("ops")
+}

@@ -589,6 +589,69 @@ api.delete('/headsheets/:id', async (req, res) => {
   }
 });
 
+/////////////////////////// Operations Flows //////////////////////////////////////
+
+// GET all Flows
+api.get('/opsflows', async (req, res) => {
+  try {
+    const opsflows = await prisma.operationalFlows.findMany();
+    res.json(opsflows);
+  } catch (error) {
+    console.error('Error fetching HeadSheets:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// UPDATE opsflow
+api.put('/opsflows/:id', async (req, res) => {
+  const { id } = req.params; // Extract id from params
+  const { name, type, remoteSource, remoteValue, remoteTimestamp, override, manualValue, manualTimestamp } = req.body; // Use req.body instead of req.params for request body
+
+  try {
+    // Assuming you have a model named 'opsflows' in your Prisma schema
+    const updatedOpsflow = await prisma.opsflows.update({
+      where: {
+        id: parseInt(id), // Convert id to integer
+      },
+      data: {
+        name,
+        type,
+        remoteSource,
+        remoteValue,
+        remoteTimestamp,
+        override,
+        manualValue,
+        manualTimestamp,
+      },
+    });
+
+    res.json(updatedOpsflow); // Send the updated opsflow as the response
+  } catch (error) {
+    console.error('Error updating opsflow:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+
+// POST a new opsflow
+api.post('/opsflows', async (req, res) => {
+  const { name, type, remoteSource } = req.body;
+  try {
+    const newOpsFlow = await prisma.operationalFlows.create({
+      data: {
+        name,
+        type,
+        remoteSource
+      },
+    });
+    res.json(newOpsFlow);
+  } catch (error) {
+    console.error('Error Creating Flow Item:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 /////////////////////////// Deliveries //////////////////////////////////////
 
 

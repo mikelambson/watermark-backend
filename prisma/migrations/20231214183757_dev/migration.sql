@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "ops"."OperationalFlows" ALTER COLUMN "remoteValue" SET DATA TYPE DOUBLE PRECISION,
+ALTER COLUMN "manualValue" SET DATA TYPE DOUBLE PRECISION;
