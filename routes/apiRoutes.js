@@ -594,7 +594,11 @@ api.delete('/headsheets/:id', async (req, res) => {
 // GET all Flows
 api.get('/opsflows', async (req, res) => {
   try {
-    const opsflows = await prisma.operationalFlows.findMany();
+    const opsflows = await prisma.operationalFlows.findMany({
+      orderBy: {
+        id: 'asc', // 'asc' for ascending, 'desc' for descending
+      },
+    });
     res.json(opsflows);
   } catch (error) {
     console.error('Error fetching HeadSheets:', error);
