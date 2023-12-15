@@ -609,7 +609,7 @@ api.put('/opsflows/:id', async (req, res) => {
 
   try {
     // Assuming you have a model named 'opsflows' in your Prisma schema
-    const updatedOpsflow = await prisma.opsflows.update({
+    const updatedOpsflow = await prisma.operationalFlows.update({
       where: {
         id: parseInt(id), // Convert id to integer
       },
