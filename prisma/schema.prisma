@@ -85,14 +85,14 @@ model Schedule {
   orderId             Int
   scheduledLineId     Int
   scheduledHead       Int?
-  travelTime          Int @default(0)
+  travelTime          Float @default(0)
   dropIn              Boolean @default(false)
   instructions        String?
   watermasterNote     Json?
   specialRequest      String?
   
-  orders              Orders @relation(fields: [orderId], references: [id])
-  scheduledLine     HeadSheets @relation(fields: [scheduledLineId], references: [id])
+  order               Orders @relation(fields: [orderId], references: [id])
+  scheduledLine       HeadSheets @relation(fields: [scheduledLineId], references: [id])
   
   @@id([orderId, scheduledLineId])
   @@schema("ops")

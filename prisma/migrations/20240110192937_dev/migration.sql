@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "ops"."Schedule" ALTER COLUMN "travelTime" SET DEFAULT 0,
+ALTER COLUMN "travelTime" SET DATA TYPE DOUBLE PRECISION;
