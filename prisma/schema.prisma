@@ -10,6 +10,8 @@ datasource db {
   extensions = [pgcrypto]
 }
 
+
+
 model Users {
   id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   login        String   @unique @db.VarChar
@@ -77,6 +79,7 @@ model Orders {
   schedule        Schedule[]
   deliveries      Deliveries[]
   callout         Callouts[]
+  analysis        OrderAnalysis[]
 
 }
 
@@ -164,3 +167,18 @@ model OperationalFlows {
 
   @@schema("ops")
 }
+
+model OrderAnalysis {
+  id                String   @id @default(dbgenerated("uuid_generate_v1mc()")) @db.Uuid
+  deliveredOrder    Orders @relation(fields: [orderId], references: [id])
+  orderId           Int
+  startTime         DateTime
+  stopTime          DateTime
+  cfs               Float
+  af                Float
+  analysisNote      String
+  
+
+  @@schema("analysis")
+}
+

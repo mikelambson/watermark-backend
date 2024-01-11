@@ -123,8 +123,53 @@ api.put('/orders/:orderNumber/:year?', async (req, res) => {
   }
 });
 
-
-
+////////////////// Order Count
+  // GET order count by status types
+  api.get('/ordercount/:year?', async (req, res) => {
+    try {
+      const { year } = req.params;
+      const currentYear = year || new Date().getFullYear();
+      const statusTypes = ["O", "P", "scheduled", "running", "pa", "rtp", "posted", "C", "F", "S", "A", "N"];
+      const orderCounts = {};
+  
+      // Count orders for each status type within the specified year or current year
+      for (const statusType of statusTypes) {
+        const count = await prisma.Orders.count({
+          where: {
+            status: statusType,
+            orderTimestamp: {
+              gte: new Date(`${currentYear}-01-01`),
+              lte: new Date(`${currentYear}-12-31T23:59:59`),
+            },
+          },
+        });
+        orderCounts[statusType] = count || 0; // Handle potential null values
+      }
+  
+      // Create the response object with status types as keys and counts as values
+      const responseObject = {
+        Year: currentYear,
+        Open: orderCounts['O'],
+        Pending: orderCounts['P'],
+        Scheduled: orderCounts['scheduled'],
+        Running: orderCounts['running'],
+        PendingAnalysis: orderCounts['pa'],
+        ReadyToPost: orderCounts['rtp'],
+        Posted: orderCounts['posted'],
+        Cancelled: orderCounts['C'],
+        Finalized: orderCounts['F'],
+        Spread: orderCounts['S'],
+        Adjusted: orderCounts['A'],
+        Null: orderCounts['N'],
+        TotalOrders: Object.values(orderCounts).reduce((acc, count) => acc + count, 0), // Calculate total count
+      };
+  
+      res.json(responseObject);
+    } catch (error) {
+      console.error('Error fetching order counts:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
 
 
 
