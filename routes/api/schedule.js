@@ -10,21 +10,98 @@ const schedule = express.Router();
 const prisma = new PrismaClient();
 
 // Functions
-const formatToLocalTime = (timestamp) => {
-  if (!timestamp) return timestamp;
-  return timestamp.toLocaleString();
+const formatToLocalTime = (date) => {
+  const options = {
+      timeZone: 'America/Los_Angeles',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour12: false, // Use 24-hour notation
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+  };
+  return date.toLocaleString('en-US', options);
 };
 
-    // Convert timestamps to local time
-
-
-
 // Route for Unscheduled Orders
-schedule.use('/unscheduled', orders, );
+schedule.use('/unscheduled', orders);
+
+////////////////////////////// Schedule ////////////////////////////////////////
 
 schedule.get('/', async (req, res) => {
+
     try{
+      const queryParameters = req.query;
+      // Define an empty filter object
+      const filter = {};
+      // Function to apply a filter condition
+      const applyFilter = (key, val) => {
+        switch (key) {
+          case 'district':
+            const districtValues = val.split(','); // Split the values if multiple districts are provided
+            if (!filter.order) {
+                filter.order = {}; // Initialize the order object if it doesn't exist
+            }
+            filter.order.district = {
+                in: districtValues,
+                mode: 'insensitive',
+            };
+            break;
+          
+          case 'line': // Handle 'scheduledLine'
+            const lineValues = val.split(',');
+            if (!filter.scheduledLine) {
+              filter.scheduledLine = {}; // Initialize the order object if it doesn't exist
+            }
+            if (!isNaN(val)) {
+              // If val is a number, set filter.scheduledLine.id
+              filter.scheduledLine.id = parseInt(val);
+            } else {
+              // If val is not a number, set filter.scheduledLine.name
+              filter.scheduledLine.name = {
+                  in: lineValues,
+                  mode: 'insensitive',
+              };
+            }
+            break;
+
+          case 'status':
+             // Split the 'val' into individual status values based on the specified character (or '&')
+            const statusValues = val.split(','); // Use a comma as a separator, change it to your preferred character if needed
+            if (!filter.order) {
+                filter.order = {}; // Initialize the order object if it doesn't exist
+            }
+            filter.order.status = {
+                in: statusValues,
+                mode: 'insensitive',
+            };
+            break;
+          
+          case 'head':
+            filter.scheduledHead = parseInt(val)
+          break;
+
+          // Add more cases for other filter criteria as needed
+          default:
+            throw new Error(`Invalid filter criteria: ${key}`);
+        }
+      };
+
+      // Apply filter criteria from queryParameters
+      for (const key in queryParameters) {
+        if (key.startsWith('find:') && queryParameters[key]) {
+          const criteria = key.replace('find:', '');
+          try {
+            applyFilter(criteria, queryParameters[key]);
+          } catch (error) {
+            return res.status(400).json({ error: error.message }); // Return error response
+          }
+        }
+      }
+
       const schedules = await prisma.Schedule.findMany({
+        where: filter,
         include: {
           order: {
             select: {
@@ -49,19 +126,39 @@ schedule.get('/', async (req, res) => {
                 deliveryNote: true,
                 },
               },
+              analysis: {
+                select: {
+                  id: true,
+                  startTime: true,
+                  stopTime: true,
+                  cfs:true,
+                  af: true,
+                  analysisNote: true,
+                },
+              },
             },
           },
           scheduledLine: true,
         },
       });
 
+      const formatAnalysis = (analysis) => {
+        if (!analysis) return null;
+
+        return analysis.map((analysis) => ({
+          ...analysis,
+          startTime: formatToLocalTime(analysis.startTime),
+          stopTime: formatToLocalTime(analysis.stopTime),
+        }))
+      };
+
       const formatMeasurement = (measurement) => {
         if (!measurement) return null;
 
         return measurement.map((measurement) => ({
           ...measurement,
-          startTime: measurement.startTime.toLocaleString(),
-          stopTime: measurement.stopTime.toLocaleString(),
+          startTime: formatToLocalTime(measurement.startTime),
+          stopTime: formatToLocalTime(measurement.stopTime),
         }))
       };
 
@@ -71,21 +168,22 @@ schedule.get('/', async (req, res) => {
         
         return deliveries.map((delivery) => ({
             ...delivery,
-            startTime: delivery.startTime.toLocaleString(),
-            stopTime: delivery.stopTime?.toLocaleString(),
+            startTime: formatToLocalTime(delivery.startTime),
+            stopTime: formatToLocalTime(delivery.stopTime),
             measurement: formatMeasurement(deliveries.measurement),
         }));
       };
 
       const formatOrder = (order) => ({
         ...order,
-        orderTimestamp: order.orderTimestamp.toLocaleString(),
-        deliveries: formatDeliveries(order.deliveries)
+        orderTimestamp: formatToLocalTime(order.orderTimestamp),
+        deliveries: formatDeliveries(order.deliveries),
+        analysis: formatAnalysis(order.analysis)
       });
 
       const formattedSchedules = schedules.map((schedule) => ({
           ...schedule,
-          scheduledDate: schedule.scheduledDate.toLocaleString(),
+          scheduledDate: formatToLocalTime(schedule.scheduledDate),
           order: formatOrder(schedule.order),
       }));
 
@@ -96,43 +194,7 @@ schedule.get('/', async (req, res) => {
   }
 })
 
-////////////////////////////// Schedule ////////////////////////////////////////
-
-// Schedule: GET
-// Route for Scheduled Orders
-schedule.get('/scheduled', async (req, res) => {
-    updateLogData("Data Req");
-  try {
-    const { district, headsheet, head, line } = req.query;
-
-    // Construct Prisma query for Scheduled Orders
-    const scheduledOrders = await prisma.orders.findMany({
-      where: {
-        district,
-        headsheet,
-        headTab: head,
-        status: {
-          in: ['scheduled', 'running'],
-        },
-        line,
-      },
-      // Include other necessary tables as needed
-      include: {
-        Schedule: true,
-        ScheduleNotes: true,
-      },
-    });
-
-    // Respond with the fetched Scheduled Orders
-    res.json({ scheduledOrders });
-  } catch (error) {
-    console.error('Error fetching scheduled orders:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
-
-////////////// Schedule: POST
+////////////// Schedule: POST ////////////
 
 // Schedule: POST
 schedule.post('/schedule', async (req, res) => {
@@ -142,7 +204,7 @@ schedule.post('/schedule', async (req, res) => {
     // Convert scheduledDate to UTC before storing in the database
     const utcScheduledDate = new Date(scheduledDate);
     // Apply PDT offset
-    utcScheduledDate.setTime(utcScheduledDate.getTime() + pdtOffset);
+    utcScheduledDate.setTime(utcScheduledDate.getTime());
 
     const newSchedule = await prisma.schedule.create({
       data: {
@@ -165,7 +227,7 @@ schedule.post('/schedule', async (req, res) => {
   }
 });
 
-//////////////// Schedule: PUT
+//////////////// Schedule: PUT ////////////////////
 
 // Schedule: PUT
 schedule.put('/schedule/:scheduleId', async (req, res) => {
@@ -188,7 +250,6 @@ schedule.put('/schedule/:scheduleId', async (req, res) => {
         scheduledLine,
         scheduledHead,
         travelTime,
-        dropIn,
         instructions,
         watermasterNote,
         specialRequest,
