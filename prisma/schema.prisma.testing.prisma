@@ -1,0 +1,190 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema", "postgresqlExtensions"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["config", "auth",  "master", "maint", "ops", "analysis", "public", "timeseries"]
+  extensions = [pgcrypto]
+}
+
+
+
+model Users {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  login        String   @unique @db.VarChar
+  password     String   @db.VarChar
+  fullname     String?  @db.VarChar
+  email        String?  @db.VarChar
+  title        String?  @default("user") @db.VarChar
+  tcid_staff   Boolean? @default(false)
+  protected    Boolean  @default(false)
+  active       Boolean  @default(true)
+  roleId       UserRoles[]
+  callout      Callouts[]
+
+  @@schema("auth")
+}
+
+model Roles {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String   @unique @db.VarChar
+  users       UserRoles[]
+  
+  @@schema("auth")
+}
+
+model UserRoles {
+  user        Users @relation(fields: [userId], references: [id])
+  userId      String @db.Uuid
+  role        Roles @relation(fields: [roleId], references: [id])
+  roleId      String @db.Uuid
+  assignedAt  DateTime @default(now())
+  assignedBy  String
+
+  @@id([userId, roleId])
+
+  @@schema("auth")
+}
+
+model Orders {
+  id              Int @id @default(autoincrement())
+  orderTimestamp  DateTime
+  orderNumber     Int
+  tcidSn          String?
+  district        String?
+  status          String?
+  laterals        String[]
+  approxCfs       Float?
+  approxHrs       Float?
+  phoneNumbers    String[]
+  remarks         String?
+  details         Json? @db.JsonB
+  
+  // SQL Schema Setup
+  @@schema("timeseries")
+  @@unique([orderTimestamp, orderNumber])
+  @@unique([id,status])
+  
+  //Indexes
+  @@index([orderTimestamp], type:Brin, name: "order_timestamp_index")
+  @@index([status], type: Hash, name: "status_index")
+  @@index([orderNumber], type: Hash, name: "order_number_index")
+  @@index([tcidSn], type: Hash, name: "tcid_sn_index")
+  @@index([orderNumber, orderTimestamp], type:Brin , name: "order_number_timestamp_index")
+  @@index([status, orderTimestamp], type:Brin , name: "order_status_timestamp_index")
+
+  //Relations
+  schedule        Schedule[] @relation("StatusRelation")
+  deliveries      Deliveries[]
+  callout         Callouts[]
+  analysis        OrderAnalysis[]
+
+}
+
+model Schedule {
+  scheduledDate       DateTime
+  orderId             Int
+  scheduledLineId     Int
+  scheduledHead       Int?
+  travelTime          Float @default(0)
+  dropIn              Boolean @default(false)
+  instructions        String?
+  watermasterNote     Json?
+  specialRequest      String?
+  orderStatus         String
+
+  //Relations
+  order               Orders @relation("StatusRelation", fields: [orderId, orderStatus], references: [id, status])
+  scheduledLine       HeadSheets @relation(fields: [scheduledLineId], references: [id])
+  
+  //Indexes
+  @@id([orderId, scheduledLineId])
+  @@schema("ops")
+  @@index([scheduledDate], type:Brin, name: "schedule_date_index")
+  @@index([orderId], type:Hash, name: "hashed_orders_index")
+  @@index([scheduledLineId], type:Hash, name: "line_id_index")
+}
+
+model Callouts {
+  id                  Int @id @default(autoincrement())
+  callout             Boolean? @default(false)
+  calloutDone         DateTime?
+  calloutUser         String @db.Uuid
+  orderId             Int
+
+  order               Orders @relation(fields: [orderId], references: [id])
+  user                Users @relation(fields: [calloutUser], references: [id])
+
+  @@schema("ops")
+}
+
+model HeadSheets {
+  id              Int @id @default(autoincrement())
+  name            String
+  district        String
+  maxHeads        Int
+  structureRef    String?
+  maxFlow         Int?
+  characteristics Json?
+  schedules       Schedule[]
+
+  @@schema("ops")
+
+}
+
+model Deliveries {
+  id                Int @id @default(autoincrement())
+  scheduledOrder    Orders @relation(fields: [orderId], references: [id])
+  orderId           Int
+  startTime         DateTime
+  stopTime          DateTime?
+  measurement       Measurements[]
+  deliveryNote      String?
+
+  @@schema("ops")
+}
+
+model Measurements {
+  id                Int @id @default(autoincrement())
+  scheduledOrder    Deliveries @relation(fields: [deliveryId], references: [id])
+  deliveryId        Int
+  startTime         DateTime
+  stopTime          DateTime?
+  measurement       Int
+  measurementType   String @default("estimation")
+  measurementNote   String?
+
+  @@schema("ops")
+}
+
+model OperationalFlows {
+  id                Int @id @default(autoincrement())
+  name              String
+  type              String
+  remoteSource      String?
+  remoteValue       Float?
+  remoteTimestamp   DateTime?
+  override          Boolean @default(false)
+  manualValue       Float?
+  manualTimestamp   DateTime?
+
+  @@schema("ops")
+}
+
+model OrderAnalysis {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  deliveredOrder    Orders @relation(fields: [orderId], references: [id])
+  orderId           Int
+  startTime         DateTime
+  stopTime          DateTime
+  cfs               Float
+  af                Float
+  analysisNote      String
+  
+
+  @@schema("analysis")
+}
+
