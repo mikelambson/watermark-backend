@@ -117,25 +117,25 @@ schedule.get('/', async (req, res) => {
               phoneNumbers: true,
               remarks: true,
               details: true,
-              deliveries: {
-                select: {
-                id: true,
-                startTime: true,
-                stopTime: true,
-                measurement: true,
-                deliveryNote: true,
-                },
-              },
-              analysis: {
-                select: {
-                  id: true,
-                  startTime: true,
-                  stopTime: true,
-                  cfs:true,
-                  af: true,
-                  analysisNote: true,
-                },
-              },
+            }, 
+          },
+          deliveries: {
+            select: {
+            id: true,
+            startTime: true,
+            stopTime: true,
+            measurement: true,
+            deliveryNote: true,
+            },
+          },
+          analysis: {
+            select: {
+              id: true,
+              startTime: true,
+              stopTime: true,
+              cfs:true,
+              af: true,
+              analysisNote: true,
             },
           },
           scheduledLine: true,

@@ -1,6 +1,6 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["multiSchema", "postgresqlExtensions"]
+  previewFeatures = ["multiSchema", "postgresqlExtensions", "relationJoins"]
 }
 
 datasource db {
@@ -10,8 +10,7 @@ datasource db {
   extensions = [pgcrypto]
 }
 
-
-
+//////////////////// Auth ////////////////////
 model Users {
   id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   login        String   @unique @db.VarChar
@@ -49,8 +48,9 @@ model UserRoles {
   @@schema("auth")
 }
 
+//////////////////// Timeseries ////////////////////
 model Orders {
-  id              Int @id @default(autoincrement())
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   orderTimestamp  DateTime
   orderNumber     Int
   tcidSn          String?
@@ -62,11 +62,11 @@ model Orders {
   phoneNumbers    String[]
   remarks         String?
   details         Json? @db.JsonB
-  
-  // SQL Schema Setup
-  @@schema("timeseries")
-  @@unique([orderTimestamp, orderNumber])
-  
+
+
+  //Relations
+  schedule        Schedule[]
+
   //Indexes
   @@index([orderTimestamp], type:Brin, name: "order_timestamp_index")
   @@index([status], type: Hash, name: "status_index")
@@ -74,32 +74,39 @@ model Orders {
   @@index([tcidSn], type: Hash, name: "tcid_sn_index")
   @@index([orderNumber, orderTimestamp], type:Brin , name: "order_number_timestamp_index")
   @@index([status, orderTimestamp], type:Brin , name: "order_status_timestamp_index")
-
-  //Relations
-  schedule        Schedule[]
-  deliveries      Deliveries[]
-  callout         Callouts[]
-  analysis        OrderAnalysis[]
-
+  
+// SQL Schema Setup
+  @@schema("timeseries")
+  @@unique([orderTimestamp, orderNumber])
 }
 
+//////////////////// Ops ////////////////////
 model Schedule {
-  scheduledDate       DateTime
-  orderId             Int
+  scheduledDate       DateTime?
   scheduledLineId     Int
   scheduledHead       Int?
   travelTime          Float @default(0)
-  dropIn              Boolean @default(false)
   instructions        String?
   watermasterNote     Json?
   specialRequest      String?
-  
+  cancelled           Boolean @default(false)
+  cancelReason        String?
+  orderId             String @db.Uuid
+
+  //Relations
   order               Orders @relation(fields: [orderId], references: [id])
   scheduledLine       HeadSheets @relation(fields: [scheduledLineId], references: [id])
+  callout             Callouts[]
+  deliveries          Deliveries[]
+  analysis            OrderAnalysis[]
+
+  @@id([orderId])
   
-  @@id([orderId, scheduledLineId])
-  @@schema("ops")
+  //Indexs
   @@index([scheduledDate], type:Brin, name: "schedule_date_index")
+  
+  //Schema
+  @@schema("ops")
 }
 
 model Callouts {
@@ -107,49 +114,38 @@ model Callouts {
   callout             Boolean? @default(false)
   calloutDone         DateTime?
   calloutUser         String @db.Uuid
-  orderId             Int
+  scheduleId          String @db.Uuid
 
-  order               Orders @relation(fields: [orderId], references: [id])
+  schedule            Schedule @relation(fields: [scheduleId], references: [orderId])
   user                Users @relation(fields: [calloutUser], references: [id])
 
   @@schema("ops")
 }
 
-model HeadSheets {
-  id              Int @id @default(autoincrement())
-  name            String
-  district        String
-  maxHeads        Int
-  structureRef    String?
-  maxFlow         Int?
-  characteristics Json?
-  schedules       Schedule[]
-
-  @@schema("ops")
-
-}
-
 model Deliveries {
-  id                Int @id @default(autoincrement())
-  scheduledOrder    Orders @relation(fields: [orderId], references: [id])
+  id                String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   orderId           Int
-  startTime         DateTime
+  startTime         DateTime?
   stopTime          DateTime?
-  measurement       Measurements[]
   deliveryNote      String?
+  scheduleId        String @db.Uuid
+
+  schedule          Schedule @relation(fields: [scheduleId], references: [orderId])
+  measurement       Measurements[]
 
   @@schema("ops")
 }
 
 model Measurements {
-  id                Int @id @default(autoincrement())
-  scheduledOrder    Deliveries @relation(fields: [deliveryId], references: [id])
-  deliveryId        Int
+  id                String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   startTime         DateTime
   stopTime          DateTime?
   measurement       Int
   measurementType   String @default("estimation")
   measurementNote   String?
+  deliveryId        String @db.Uuid
+
+  scheduledOrder    Deliveries @relation(fields: [deliveryId], references: [id])
 
   @@schema("ops")
 }
@@ -168,17 +164,32 @@ model OperationalFlows {
   @@schema("ops")
 }
 
+model HeadSheets {
+  id              Int @id @default(autoincrement())
+  name            String
+  district        String
+  maxHeads        Int
+  structureRef    String?
+  maxFlow         Int?
+  characteristics Json?
+  schedules       Schedule[]
+
+  @@schema("ops")
+
+}
+
+//////////////////// Analysis ////////////////////
 model OrderAnalysis {
   id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  deliveredOrder    Orders @relation(fields: [orderId], references: [id])
-  orderId           Int
   startTime         DateTime
   stopTime          DateTime
   cfs               Float
   af                Float
   analysisNote      String
+  scheduleId        String @db.Uuid
   
-
+  schedule          Schedule @relation(fields: [scheduleId], references: [orderId])
+  
   @@schema("analysis")
 }
 
