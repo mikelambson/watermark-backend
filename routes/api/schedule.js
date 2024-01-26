@@ -16,7 +16,6 @@ schedule.use('/unscheduled', orders);
 ////////////////////////////// Schedule ////////////////////////////////////////
 
 schedule.get('/', async (req, res) => {
-
     try{
       const queryParameters = req.query;
       // Define an empty filter object
