@@ -9,20 +9,6 @@ import orders from "./orders.js";
 const schedule = express.Router();
 const prisma = new PrismaClient();
 
-// Functions
-const formatToLocalTime = (date) => {
-  const options = {
-      timeZone: 'America/Los_Angeles',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour12: false, // Use 24-hour notation
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-  };
-  return date.toLocaleString('en-US', options);
-};
 
 // Route for Unscheduled Orders
 schedule.use('/unscheduled', orders);
@@ -147,8 +133,8 @@ schedule.get('/', async (req, res) => {
 
         return analysis.map((analysis) => ({
           ...analysis,
-          startTime: formatToLocalTime(analysis.startTime),
-          stopTime: formatToLocalTime(analysis.stopTime),
+          startTime: analysis.startTime,
+          stopTime: analysis.stopTime,
         }))
       };
 
@@ -157,8 +143,8 @@ schedule.get('/', async (req, res) => {
 
         return measurement.map((measurement) => ({
           ...measurement,
-          startTime: formatToLocalTime(measurement.startTime),
-          stopTime: formatToLocalTime(measurement.stopTime),
+          startTime: measurement.startTime,
+          stopTime: measurement.stopTime,
         }))
       };
 
@@ -168,22 +154,22 @@ schedule.get('/', async (req, res) => {
         
         return deliveries.map((delivery) => ({
             ...delivery,
-            startTime: formatToLocalTime(delivery.startTime),
-            stopTime: formatToLocalTime(delivery.stopTime),
+            startTime: delivery.startTime,
+            stopTime: delivery.stopTime,
             measurement: formatMeasurement(deliveries.measurement),
         }));
       };
 
       const formatOrder = (order) => ({
         ...order,
-        orderTimestamp: formatToLocalTime(order.orderTimestamp),
+        orderTimestamp: order.orderTimestamp,
         deliveries: formatDeliveries(order.deliveries),
         analysis: formatAnalysis(order.analysis)
       });
 
       const formattedSchedules = schedules.map((schedule) => ({
           ...schedule,
-          scheduledDate: formatToLocalTime(schedule.scheduledDate),
+          scheduledDate: schedule.scheduledDate,
           order: formatOrder(schedule.order),
       }));
 

@@ -1,5 +1,6 @@
 {
     "HeadSheets": [
+      {"id": 0, "name": "NotScheduled", "district":"All", "maxHeads": 0},
       { "name": "T", "district": "WE", "maxHeads": 6 },
       { "name": "N", "district": "WE", "maxHeads": 2 },
       { "name": "VAE", "district": "WE", "maxHeads": 6 },

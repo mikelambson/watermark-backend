@@ -83,7 +83,7 @@ model Orders {
 //////////////////// Ops ////////////////////
 model Schedule {
   scheduledDate       DateTime?
-  scheduledLineId     Int
+  scheduledLineId     Int @default(0)
   scheduledHead       Int?
   travelTime          Float @default(0)
   instructions        String?
