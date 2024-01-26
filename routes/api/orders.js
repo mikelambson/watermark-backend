@@ -116,49 +116,40 @@ orders.get('/', async (req, res) => {
             }
             }
         }
-
-        // Fetch all orders without pagination
-        const allOrders = await prisma.Orders.findMany({
-          where: filter,
-      });
-
-        // Group orders by laterals
-        const ordersGroupedByLaterals = {};
-        allOrders.forEach(order => {
-            order.laterals.forEach(lateral => {
-                if (!ordersGroupedByLaterals[lateral]) {
-                    ordersGroupedByLaterals[lateral] = [];
-                }
-                ordersGroupedByLaterals[lateral].push(order);
-            });
-        });
-
         // Pagination
         if (queryParameters.page && queryParameters.pageSize) {
             // Calculate the skip value based on page and pageSize
             const pageInt = parseInt(queryParameters.page);
             const pageSizeInt = parseInt(queryParameters.pageSize);
             const skip = (pageInt - 1) * pageSizeInt;
-
-             // Extract orders for the requested page
-            const pagedOrders = Object.values(ordersGroupedByLaterals)
-             .flat()
-             .slice(skip, skip + pageSizeInt);
     
-             const formattedOrders = pagedOrders.map((order) => ({
-              ...order,
-              orderTimestamp: formatToLocalTime(order.orderTimestamp),
-          }));
+            // Add skip and take (pageSize) options to the query
+            const orders = await prisma.Orders.findMany({
+            where: filter,
+            skip,
+            take: pageSizeInt,
+            });
+    
+            // Convert orderTimestamp to a human-readable format
+            const formattedOrders = orders.map((order) => ({
+            ...order,
+            orderTimestamp: formatToLocalTime(order.orderTimestamp),
+            }));
     
             res.json(formattedOrders);
         } else {
             // If page and pageSize are not provided, return all results
-            const allFormattedOrders = allOrders.map((order) => ({
-              ...order,
-              orderTimestamp: formatToLocalTime(order.orderTimestamp),
-          }));
+            const orders = await prisma.Orders.findMany({
+            where: filter,
+            });
     
-            res.json(allFormattedOrders);
+            // Convert orderTimestamp to a human-readable format
+            const formattedOrders = orders.map((order) => ({
+            ...order,
+            orderTimestamp: formatToLocalTime(order.orderTimestamp),
+            }));
+    
+            res.json(formattedOrders);
         }
         } catch (error) {
         console.error('Error fetching orders:', error);
