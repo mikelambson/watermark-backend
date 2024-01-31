@@ -63,7 +63,6 @@ model Orders {
   remarks         String?
   details         Json? @db.JsonB
 
-
   //Relations
   schedule        Schedule[]
 

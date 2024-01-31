@@ -122,10 +122,19 @@ orders.get('/', async (req, res) => {
             const pageInt = parseInt(queryParameters.page);
             const pageSizeInt = parseInt(queryParameters.pageSize);
             const skip = (pageInt - 1) * pageSizeInt;
+
+            const totalCount = await prisma.Orders.count({
+              where: filter,
+            });
+          
+            const totalPages = Math.ceil(totalCount / pageSizeInt);
     
             // Add skip and take (pageSize) options to the query
             const orders = await prisma.Orders.findMany({
             where: filter,
+            include: {
+              schedule: true,
+            },
             skip,
             take: pageSizeInt,
             });
@@ -135,6 +144,15 @@ orders.get('/', async (req, res) => {
             ...order,
             orderTimestamp: formatToLocalTime(order.orderTimestamp),
             }));
+
+            const response = {
+              metadata: {
+                  totalPages,
+                  totalCount,
+              },
+              data: formattedOrders,
+               // Your existing data
+            };
     
             res.json(formattedOrders);
         } else {
