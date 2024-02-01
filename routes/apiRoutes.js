@@ -64,65 +64,6 @@ api.get("/status", async (req, res) => {
 });
 
 
-
-
-
-/////////// Orders: Put Functions 
-
-api.put('/orders/:orderNumber/:year?', async (req, res) => {
-  const { year, orderNumber } = req.params;
-  const { newStatus } = req.body;
-
-  // If year is not provided, default to the current year
-  const currentYear = year || new Date().getFullYear().toString();
-
-  try {
-    // Retrieve the order by orderId and year from the database
-    const order = await prisma.orders.findMany({
-      where: {
-        AND: [
-          { orderNumber: parseInt(orderNumber) },
-          {
-            orderTimestamp: {
-              gte: new Date(`${currentYear}-01-01T00:00:00Z`),  // Start of the specified year
-              lte: new Date(`${currentYear}-12-31T23:59:59Z`),  // End of the specified year
-            },
-          },
-        ],
-      },
-    });
-
-    // If the order does not exist, return a 404 Not Found response
-    if (!order || order.length === 0) {
-      return res.status(404).json({ error: 'Order not found' });
-    }
-
-    // Update the order status with the newStatus provided in the request body
-    const updatedOrder = await prisma.orders.updateMany({
-      where: {
-        AND: [
-          { orderNumber: parseInt(orderNumber) },
-          {
-            orderTimestamp: {
-              gte: new Date(`${currentYear}-01-01T00:00:00Z`),  // Start of the specified year
-              lte: new Date(`${currentYear}-12-31T23:59:59Z`),  // End of the specified year
-            },
-          },
-        ],
-      },
-      data: {
-        status: newStatus,
-      },
-    });
-
-    // Return the updated order as the response
-    res.json(updatedOrder);
-  } catch (error) {
-    console.error('Error updating order status:', error);
-    res.status(500).json({ error: 'Internal Server Error', details: error.message });
-  }
-});
-
 ////////////////// Order Count
   // GET order count by status types
   api.get('/ordercount/:year?', async (req, res) => {

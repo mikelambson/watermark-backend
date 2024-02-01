@@ -13,7 +13,7 @@ const router = express.Router();
 // middleware that is specific to this router
 router.use((req, res, next) => {
   res.locals.pageTitle = "WaterMARK Backend";
-  console.log("Time: ", Date.now());
+  console.log("Time: ", new Date(Date.now()).toLocaleString());
   next();
 });
 

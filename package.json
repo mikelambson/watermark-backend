@@ -9,7 +9,8 @@
     "dev": "nodemon app.js",
     "clean": "npm prune",
     "rebuild": "npm ci",
-    "git": "git add --all && git commit -m \"Update Code\" && git push"
+    "git": "git add --all && git commit -m \"Update Code\" && git push",
+    "count": "node count-lines.cjs"
   },
   "type": "module",
   "dependencies": {
@@ -33,5 +34,6 @@
   "devDependencies": {
     "nodemon": "^3.0.1",
     "prisma": "^5.9.0"
-  }
+  },
+  "linecount": 4083
 }

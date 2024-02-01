@@ -123,14 +123,14 @@ orders.get('/', async (req, res) => {
             const pageSizeInt = parseInt(queryParameters.pageSize);
             const skip = (pageInt - 1) * pageSizeInt;
 
-            const totalCount = await prisma.Orders.count({
+            const totalCount = await prisma.orders.count({
               where: filter,
             });
           
             const totalPages = Math.ceil(totalCount / pageSizeInt);
     
             // Add skip and take (pageSize) options to the query
-            const orders = await prisma.Orders.findMany({
+            const orders = await prisma.orders.findMany({
             where: filter,
             include: {
               schedule: true,
@@ -157,7 +157,7 @@ orders.get('/', async (req, res) => {
             res.json(formattedOrders);
         } else {
             // If page and pageSize are not provided, return all results
-            const orders = await prisma.Orders.findMany({
+            const orders = await prisma.orders.findMany({
             where: filter,
             });
     
@@ -176,116 +176,56 @@ orders.get('/', async (req, res) => {
   }
 );
   
-  
-  //////////// Order: Status 
-  
-  orders.get('/:status', async (req, res) => {
-    const { status } = req.params;
-    const statuses = status.split('&');
-  
-    // Define an array to store positive filters
-    let positiveFilters = [];
-  
-    // Iterate through the provided statuses and build the filter object
-    statuses.forEach((status) => {
-      const filterCondition = {
-        status: {
-          contains: status,
-          mode: 'insensitive',
-        },
-        orderTimestamp: {
-          gte: new Date(`${new Date().getFullYear()}-01-01T00:00:00Z`),  // Start of the current year
-          lte: new Date(`${new Date().getFullYear()}-12-31T23:59:59Z`),  // End of the current year
-        },
-      };
-      positiveFilters.push(filterCondition);
-    });
-  
-    let whereCondition = {};
-  
-    // Combine positive filters with logical OR operation
-    if (positiveFilters.length > 0) {
-      whereCondition.OR = positiveFilters;
-    }
-  
+  orders.get('/:orderId', async (req, res) => {
+    const { orderId } = req.params;
     try {
-      // Retrieve and return filtered orders using Prisma
-      const orders = await prisma.Orders.findMany({
-        where: whereCondition,
-      });
-  
-      // Convert orderTimestamp to a human-readable format
-      const formattedOrders = orders.map((order) => ({
-        ...order,
-        orderTimestamp: formatToLocalTime(order.orderTimestamp),
-      }));
-  
-      res.json(formattedOrders);
-    } catch (error) {
-      console.error('Error fetching orders:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
-    }
-  });
-  
-
-  
-  
-  
-  
-  /////////// Orders: Put Functions 
-  
-  orders.put('/orders/:orderNumber/:year?', async (req, res) => {
-    const { year, orderNumber } = req.params;
-    const { newStatus } = req.body;
-  
-    // If year is not provided, default to the current year
-    const currentYear = year || new Date().getFullYear().toString();
-  
-    try {
-      // Retrieve the order by orderId and year from the database
-      const order = await prisma.orders.findMany({
+      // Retrieve the order by orderId from the database
+      const order = await prisma.orders.findUnique({
         where: {
-          AND: [
-            { orderNumber: parseInt(orderNumber) },
-            {
-              orderTimestamp: {
-                gte: new Date(`${currentYear}-01-01T00:00:00Z`),  // Start of the specified year
-                lte: new Date(`${currentYear}-12-31T23:59:59Z`),  // End of the specified year
-              },
-            },
-          ],
+          id: orderId,
+        },
+        include: {
+          schedule: true,
         },
       });
   
       // If the order does not exist, return a 404 Not Found response
-      if (!order || order.length === 0) {
+      if (!order) {
         return res.status(404).json({ error: 'Order not found' });
       }
-  
-      // Update the order status with the newStatus provided in the request body
-      const updatedOrder = await prisma.orders.updateMany({
-        where: {
-          AND: [
-            { orderNumber: parseInt(orderNumber) },
-            {
-              orderTimestamp: {
-                gte: new Date(`${currentYear}-01-01T00:00:00Z`),  // Start of the specified year
-                lte: new Date(`${currentYear}-12-31T23:59:59Z`),  // End of the specified year
-              },
-            },
-          ],
-        },
-        data: {
-          status: newStatus,
-        },
-      });
-  
-      // Return the updated order as the response
-      res.json(updatedOrder);
+      res.json(order);
     } catch (error) {
       console.error('Error updating order status:', error);
       res.status(500).json({ error: 'Internal Server Error', details: error.message });
     }
+  })
+  
+  /////////// Orders: Put Functions //////////////////////////////////
+  orders.put('/:orderId', async (req, res) => {
+    const { orderId } = req.params;
+    const { 
+      status, 
+    } = req.body.data;
+  
+    try {
+      console.log('Updating order. ID:', orderId, 'New Status:', status);
+  
+      const updatedOrder = await prisma.orders.update({
+          where: {
+              id: orderId,
+          },
+          data: {
+              status,
+          },
+      });
+  
+      console.log('Updated Order:', updatedOrder);
+      res.json(updatedOrder);
+  } catch (error) {
+      console.error('Error updating order status:', error);
+      res.status(500).json({ error: 'Internal Server Error', details: error.message });
+  }
   });
+  
 
   export default orders;
