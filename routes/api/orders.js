@@ -159,6 +159,9 @@ orders.get('/', async (req, res) => {
             // If page and pageSize are not provided, return all results
             const orders = await prisma.orders.findMany({
             where: filter,
+            include: {
+              schedule: true,
+            },
             });
     
             // Convert orderTimestamp to a human-readable format
