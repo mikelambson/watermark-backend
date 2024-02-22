@@ -150,11 +150,11 @@ orders.get('/', async (req, res) => {
                   totalPages,
                   totalCount,
               },
-              data: formattedOrders,
+              orders: formattedOrders,
                // Your existing data
             };
     
-            res.json(formattedOrders);
+            res.json(response);
         } else {
             // If page and pageSize are not provided, return all results
             const orders = await prisma.orders.findMany({
