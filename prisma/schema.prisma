@@ -113,7 +113,7 @@ model Callouts {
   callout             Boolean? @default(false)
   calloutDone         DateTime?
   calloutUser         String @db.Uuid
-  scheduleId          String @db.Uuid
+  scheduleId          String @db.Uuid 
 
   schedule            Schedule @relation(fields: [scheduleId], references: [orderId])
   user                Users @relation(fields: [calloutUser], references: [id])

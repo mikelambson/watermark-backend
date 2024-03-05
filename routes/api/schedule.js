@@ -149,15 +149,14 @@ schedule.get('/', async (req, res) => {
 
       const formatDeliveries = (deliveries) => {
         if (!deliveries) return null;
-        
-        
+    
         return deliveries.map((delivery) => ({
             ...delivery,
             startTime: delivery.startTime,
             stopTime: delivery.stopTime,
-            measurement: formatMeasurement(deliveries.measurement),
+            measurement: formatMeasurement(delivery.measurement),
         }));
-      };
+    };
 
       const formatOrder = (order) => ({
         ...order,
