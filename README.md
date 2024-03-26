@@ -29,6 +29,11 @@ This backend system is designed to work with [WaterMARK](https://github.com/mike
 
 ___
 
+Example showing dev layout of backend screen:
+![Backend Image](backend.png)
+
+___
+
 ### API Method
 
 API pattern:
