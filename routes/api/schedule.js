@@ -67,6 +67,10 @@ schedule.get('/', async (req, res) => {
             filter.scheduledHead = parseInt(val)
           break;
 
+          case 'orderId': // Add case for orderId
+            filter.orderId = val; // Set filter directly for orderId
+          break;
+
           // Add more cases for other filter criteria as needed
           default:
             throw new Error(`Invalid filter criteria: ${key}`);
@@ -211,32 +215,80 @@ schedule.post('/schedule', async (req, res) => {
   }
 });
 
+//////////////// Schedule: by scheduleId ////////////////////
+
+schedule.get('/:scheduleId', async (req, res) => {
+  const { scheduleId } = req.params;
+  try {
+    const schedule = await prisma.schedule.findUnique({
+      where: {
+        orderId: scheduleId,
+      },
+      include: {
+        order: {
+          select: {
+            id: true,
+            orderTimestamp: true,
+            orderNumber: true,
+            tcidSn: true,
+            district: true,
+            status: true,
+            laterals: true,
+            approxCfs: true,
+            approxHrs: true,
+            phoneNumbers: true,
+            remarks: true,
+            details: true,
+          },
+        },
+        deliveries: {
+          select: {
+            id: true,
+            startTime: true,
+            stopTime: true,
+            measurement: true,
+            deliveryNote: true,
+          },
+        },
+        analysis: {
+          select: {
+            id: true,
+            startTime: true,
+            stopTime: true,
+            cfs: true,
+            af: true,
+            analysisNote: true,
+          },
+        },
+        scheduledLine: true,
+      },
+    });
+
+    
+    res.json(schedule);
+  } catch (error) {
+    console.error('Error fetching schedule:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  
+  }});
 //////////////// Schedule: PUT ////////////////////
 
 // Schedule: PUT
 schedule.put('/schedule/:scheduleId', async (req, res) => {
   const { scheduleId } = req.params;
-
+  const { orderId, ...updatedFields } = req.body; // Extract orderId and other updated fields
+  
   try {
-    const { scheduledDate, scheduledLine, scheduledHead, travelTime, dropIn, instructions, watermasterNote, specialRequest } = req.body;
-
-    // Convert scheduledDate to UTC before updating in the database
-    const utcScheduledDate = new Date(scheduledDate);
-    // Apply PDT offset
-    utcScheduledDate.setTime(utcScheduledDate.getTime() + pdtOffset);
-
+    console.log('Updating schedule with orderId:', scheduleId);
+    console.log('Updated Fields:', updatedFields);
+    
     const updatedSchedule = await prisma.schedule.update({
       where: {
-        id: parseInt(scheduleId),
+        orderId: scheduleId,
       },
       data: {
-        scheduledDate: utcScheduledDate,
-        scheduledLine,
-        scheduledHead,
-        travelTime,
-        instructions,
-        watermasterNote,
-        specialRequest,
+        orderId, // Include the orderId in the update
+        ...updatedFields, // Include other updated fields
       },
     });
 
@@ -246,6 +298,7 @@ schedule.put('/schedule/:scheduleId', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 // Export the schedule
 export default schedule;
