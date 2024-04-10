@@ -274,24 +274,36 @@ schedule.get('/:scheduleId', async (req, res) => {
 //////////////// Schedule: PUT ////////////////////
 
 // Schedule: PUT
-schedule.put('/schedule/:scheduleId', async (req, res) => {
+schedule.put('/:scheduleId', async (req, res) => {
   const { scheduleId } = req.params;
-  const { orderId, ...updatedFields } = req.body; // Extract orderId and other updated fields
-  
+  const { data, ...updatedFields } = req.body; // Extract data and other updated fields
   try {
     console.log('Updating schedule with orderId:', scheduleId);
-    console.log('Updated Fields:', updatedFields);
-    
+    console.log('Updated Fields:', updatedFields, 'Data:', data);
+
     const updatedSchedule = await prisma.schedule.update({
       where: {
         orderId: scheduleId,
       },
       data: {
-        orderId, // Include the orderId in the update
-        ...updatedFields, // Include other updated fields
+        scheduledDate: data.scheduledDate, // Assign scheduledDate from data
+        scheduledHead: data.scheduledHead, // Assign scheduledHead from data
+        scheduledLine: {
+          connect: {
+            id: data.scheduledLineId,
+          },
+        }, // Assign scheduledLineId from data
+        travelTime: data.travelTime, // Assign travelTime from data
+        watermasterNote: data.watermasterNote, // Assign watermasterNote from data
+        specialRequest: data.specialRequest, // Assign specialRequest from data
+        order: {
+          update: {
+            status: data.order.status,
+          },
+        },
+        
       },
     });
-
     res.json(updatedSchedule);
   } catch (error) {
     console.error('Error updating schedule:', error);
