@@ -278,30 +278,32 @@ schedule.put('/:scheduleId', async (req, res) => {
   const { scheduleId } = req.params;
   const { data, ...updatedFields } = req.body; // Extract data and other updated fields
   try {
-    console.log('Updating schedule with orderId:', scheduleId);
-    console.log('Updated Fields:', updatedFields, 'Data:', data);
+    const updateData = {};
+
+    if (data) {
+      updateData.scheduledDate = data.scheduledDate; // Assign scheduledDate from data
+      updateData.scheduledHead = data.scheduledHead; // Assign scheduledHead from data
+      updateData.travelTime = data.travelTime; // Assign travelTime from data
+      updateData.watermasterNote = data.watermasterNote; // Assign watermasterNote from data
+      updateData.specialRequest = data.specialRequest; // Assign specialRequest from data
+     
+      if (data.scheduledLineId) {
+        updateData.scheduledLine = {
+          connect: { id: data.scheduledLineId },
+        }; // Assign scheduledLineId from data
+      }
+      if (data.order && data.order.status) {
+        updateData.order = { update: { status: data.order.status } }; // Assign order status from data
+      }
+    }
 
     const updatedSchedule = await prisma.schedule.update({
       where: {
         orderId: scheduleId,
       },
       data: {
-        scheduledDate: data.scheduledDate, // Assign scheduledDate from data
-        scheduledHead: data.scheduledHead, // Assign scheduledHead from data
-        scheduledLine: {
-          connect: {
-            id: data.scheduledLineId,
-          },
-        }, // Assign scheduledLineId from data
-        travelTime: data.travelTime, // Assign travelTime from data
-        watermasterNote: data.watermasterNote, // Assign watermasterNote from data
-        specialRequest: data.specialRequest, // Assign specialRequest from data
-        order: {
-          update: {
-            status: data.order.status,
-          },
-        },
-        
+        ...updatedFields,
+        ...updateData,
       },
     });
     res.json(updatedSchedule);
