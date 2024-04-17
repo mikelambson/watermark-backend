@@ -16,6 +16,8 @@ schedule.use('/unscheduled', orders);
 ////////////////////////////// Schedule ////////////////////////////////////////
 
 schedule.get('/', async (req, res) => {
+    const clientIP = req.ip;
+    updateLogData("Schedule Req | IP: " + clientIP);
     try{
       const queryParameters = req.query;
       // Define an empty filter object
