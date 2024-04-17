@@ -10,8 +10,9 @@ const rootRoute = express.Router();
 
 // define the home page route
 rootRoute.get("/", (req, res) => {
-  console.log("Root Requested");
-  updateLogData(`Root Page Requested`);
+  const clientIP = req.ip;
+  console.log("Root Requested by: ", clientIP);
+  updateLogData(`Root Page Requested | IP: ${clientIP}`);
   // Render the "home.ejs" template and pass the initial content for the <div>
   res.render("home", {
     pageTitle: "Home",
