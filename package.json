@@ -19,6 +19,7 @@
   "type": "module",
   "dependencies": {
     "@prisma/client": "^5.18.0",
+    "argon2": "^0.40.3",
     "cors": "^2.8.5",
     "csurf": "*",
     "csv-parser": "^3.0.0",
