@@ -10,11 +10,15 @@
     "clean": "npm prune",
     "rebuild": "npm ci",
     "git": "git add --all && git commit -m \"Update Code\" && git push",
-    "count": "node count-lines.cjs"
+    "count": "node count-lines.cjs",
+    "pm2": "pm2 start 'npm run dev' --name backend",
+    "stop": "pm2 stop backend && pm2 delete backend",
+    "scale": "pm2 scale backend +3",
+    "log": "pm2 logs --raw"
   },
   "type": "module",
   "dependencies": {
-    "@prisma/client": "^5.10.2",
+    "@prisma/client": "^5.18.0",
     "cors": "^2.8.5",
     "csurf": "*",
     "csv-parser": "^3.0.0",
@@ -25,7 +29,6 @@
     "express-session": "*",
     "helmet": "*",
     "jsonwebtoken": "*",
-    "node-adodb": "*",
     "node-fetch": "^3.3.2",
     "papaparse": "^5.4.1",
     "passport": "*",
@@ -33,7 +36,7 @@
   },
   "devDependencies": {
     "nodemon": "^3.0.1",
-    "prisma": "^5.10.2"
+    "prisma": "^5.18.0"
   },
   "linecount": 4418
 }

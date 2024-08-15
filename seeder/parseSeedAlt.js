@@ -2,7 +2,7 @@ import fs from 'fs';
 import parse from 'papaparse';
 import { PrismaClient } from '@prisma/client';
 
-const csvFilePath = './seeder/scheduling.csv';
+const csvFilePath = './scheduling.csv';
 
 // Main function to parse CSV, transform data, and seed the database
 async function main() {
