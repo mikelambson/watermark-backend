@@ -18,7 +18,16 @@ const command = isWindows
   : 'git ls-files | xargs wc -l';
 
 // execSync(command, { stdio: 'inherit' });
-const lineCount = parseInt(execSync(command, { encoding: 'utf-8' }).trim(), 10);
+// const lineCount = parseInt(execSync(command, { encoding: 'utf-8' }).trim(), 10);
+// Execute the command and capture the output
+const output = execSync(command, { encoding: 'utf-8' }).trim();
+
+// Split the output into lines and get the last line
+const lines = output.split('\n');
+const lastLine = lines[lines.length - 1].trim();
+
+// Extract the total number of lines from the last line
+const lineCount = parseInt(lastLine.split(/\s+/)[0], 10);
 
 console.log(chalk.green.bold`${successSymbol} {white ${currentCountMessage}} {blueBright ${lineCount}}`);
 console.log(chalk.bold`${inProgressSymbol} {reset ${updatingMessage}}`);
