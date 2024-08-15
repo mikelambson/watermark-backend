@@ -13,7 +13,7 @@
 ![GitHub language count](https://img.shields.io/github/languages/count/mikelambson/watermark-backend)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/t/mikelambson/watermark-backend)
 
-[![Static Badge](https://img.shields.io/badge/node->20.10.0-44bf16)](https://ui.shadcn.com/)
+[![Static Badge](https://img.shields.io/badge/node->20.16.0-44bf16)](https://ui.shadcn.com/)
 ![GitHub package.json dependency version (dev dep on branch)](https://img.shields.io/github/package-json/dependency-version/mikelambson/watermark-backend/dev/prisma/master)
 ![Static Badge](https://img.shields.io/badge/DBMS-PostgreSQL-%23336791)
 ![Static Badge](https://img.shields.io/badge/DBMS_Extension-TimescaleDB-%23f5ff80)
