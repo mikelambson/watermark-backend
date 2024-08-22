@@ -51,7 +51,7 @@ model UserRoles {
 //////////////////// Timeseries ////////////////////
 model Orders {
   id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  orderTimestamp  DateTime
+  orderTimestamp  DateTime @db.Timestamptz(3)
   orderNumber     Int
   tcidSn          String?
   district        String?
@@ -81,7 +81,7 @@ model Orders {
 
 //////////////////// Ops ////////////////////
 model Schedule {
-  scheduledDate       DateTime?
+  scheduledDate       DateTime? @db.Timestamptz(3)
   scheduledLineId     Int @default(0)
   scheduledHead       Int?
   travelTime          Float @default(0)
