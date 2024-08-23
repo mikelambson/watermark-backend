@@ -138,11 +138,11 @@ model Orders {
 }
 
 model logs {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id          String   @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   time        DateTime @default(now()) @db.Timestamptz(3)
   changes     Json     @db.JsonB
 
-  @@index([time])
+  @@id([time, id])
   @@schema("timeseries")
 }
 
