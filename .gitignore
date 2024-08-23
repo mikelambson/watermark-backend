@@ -1,4 +1,5 @@
 # Ignore Development Specific Files
+*.xlsx
 *.csv
 package-lock.json
 
