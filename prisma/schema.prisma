@@ -7,7 +7,7 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
   schemas  = ["config", "auth",  "master", "maint", "ops", "analysis", "public", "timeseries"]
-  extensions = [pgcrypto]
+  extensions = [pgcrypto, timescaledb] //must install timescaledb & postgis to include
 }
 
 //////////////////// Auth ////////////////////
@@ -150,7 +150,7 @@ model PasswordResets {
   id          String    @id @default(cuid())   // Unique ID for each reset request
   userId      String    @db.Uuid               // Reference to the user's ID
   resetToken  String    @unique                // Unique token for the password reset
-  createdAt   DateTime  @default(now()) @db.Timestamptz(3)  // Timestamp when the request was created
+  createdAt   DateTime  @default(now()) @db.Timestamptz(3)  // Timestamp of request created
   expiresAt   DateTime  @db.Timestamptz(3)     // Timestamp when the token expires
   usedAt      DateTime? @db.Timestamptz(3)     // Optional timestamp when the token was used
 
