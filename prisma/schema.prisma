@@ -25,13 +25,23 @@ model Users {
   callout      Callouts[]
 
   @@schema("auth")
+  TwoFactorAuth TwoFactorAuth[]
+  LdapAuth LdapAuth[]
+  ActiveSessions ActiveSessions[]
+  PasswordResets PasswordResets[]
+  AuthAuditLogs AuthAuditLogs[]
 }
 
 model Roles {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name        String   @unique @db.VarChar
-  users       UserRoles[]
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String    @unique @db.VarChar
+  protected     Boolean   @default(false)
+  superAdmin    Boolean   @default(false)
+  requiresLDAP  Boolean   @default(false) // LDAP requirement flag
+  createdAt     DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime  @updatedAt @db.Timestamptz(3)
   
+  users         UserRoles[]
   @@schema("auth")
 }
 
@@ -47,6 +57,54 @@ model UserRoles {
 
   @@schema("auth")
 }
+
+model TwoFactorAuth {
+  id           String          @id @default(cuid()) // Unique ID for each 2FA entry
+  userid       String          @db.Uuid
+  method       String          // Enum for 2FA method type
+  value        String          // TOTP code, SMS code, etc.
+  backupCodes  String[]        // Array of backup codes
+  createdAt    DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime        @updatedAt @db.Timestamptz(3)
+  user         Users           @relation(fields: [userid], references: [id])
+
+  @@index([userid, createdAt])
+  @@schema("auth")
+}
+
+model LdapAuth {
+  id           String    @id @default(cuid()) // Unique ID for each LDAP entry
+  userid       String    @db.Uuid // Reference to Users table
+  ldapUrl      String    // LDAP server URL
+  baseDn       String    // Base DN for user lookup
+  bindDn       String    // Bind DN for authenticating the application
+  ldapUsername String    // LDAP username for the specific user
+  ldapPassword String    // Encrypted password (if needed)
+  status       String    // Active, Disabled, etc.
+  createdAt    DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime  @updatedAt @db.Timestamptz(3)
+  user         Users     @relation(fields: [userid], references: [id])
+
+  @@index([userid, ldapUsername])
+  @@schema("auth")
+}
+
+model ActiveSessions {
+  id            String    @id @default(cuid())   // Unique session ID
+  userId        String    @db.Uuid               // Reference to the user's ID
+  userAgent     String?                           // Information about the device/browser used
+  ipAddress     String?                           // IP address of the user
+  createdAt     DateTime  @default(now()) @db.Timestamptz(3)  // Session start time
+  expiresAt     DateTime? @db.Timestamptz(3)     // Optional session expiration time
+  isActive      Boolean   @default(true)         // Flag to mark if the session is currently active
+
+  user          Users     @relation(fields: [userId], references: [id])  // Link to Users table
+
+  @@index([userId, createdAt])
+  @@schema("auth")
+}
+
+
 
 //////////////////// Timeseries ////////////////////
 model Orders {
@@ -79,6 +137,43 @@ model Orders {
   @@unique([orderTimestamp, orderNumber])
 }
 
+model logs {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  time        DateTime @default(now()) @db.Timestamptz(3)
+  changes     Json     @db.JsonB
+
+  @@index([time])
+  @@schema("timeseries")
+}
+
+model PasswordResets {
+  id          String    @id @default(cuid())   // Unique ID for each reset request
+  userId      String    @db.Uuid               // Reference to the user's ID
+  resetToken  String    @unique                // Unique token for the password reset
+  createdAt   DateTime  @default(now()) @db.Timestamptz(3)  // Timestamp when the request was created
+  expiresAt   DateTime  @db.Timestamptz(3)     // Timestamp when the token expires
+  usedAt      DateTime? @db.Timestamptz(3)     // Optional timestamp when the token was used
+
+  user        Users     @relation(fields: [userId], references: [id])  // Link to Users table
+
+  @@index([userId, createdAt])
+  @@schema("timeseries")
+}
+
+model AuthAuditLogs {
+  id          String    @id @default(cuid())   // Unique ID for each audit log entry
+  userId      String    @db.Uuid               // Reference to the user's ID
+  action      String                            // Description of the action performed
+  details     Json?   @db.JsonB                // Optional field for additional details
+  createdAt   DateTime  @default(now()) @db.Timestamptz(3)  // Timestamp of the log entry
+
+  user        Users     @relation(fields: [userId], references: [id])  // Link to Users table
+
+  @@index([userId, createdAt])
+  @@schema("timeseries")
+}
+
+
 //////////////////// Ops ////////////////////
 model Schedule {
   scheduledDate       DateTime? @db.Timestamptz(3)
@@ -91,6 +186,8 @@ model Schedule {
   cancelled           Boolean @default(false)
   cancelReason        String?
   orderId             String @db.Uuid
+  createdAt           DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt           DateTime @updatedAt @db.Timestamptz(3)
 
   //Relations
   order               Orders @relation(fields: [orderId], references: [id])
@@ -113,7 +210,9 @@ model Callouts {
   callout             Boolean? @default(false)
   calloutDone         DateTime? @db.Timestamptz(3)
   calloutUser         String @db.Uuid
-  scheduleId          String @db.Uuid 
+  scheduleId          String @db.Uuid
+  createdAt           DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt           DateTime @updatedAt @db.Timestamptz(3) 
 
   schedule            Schedule @relation(fields: [scheduleId], references: [orderId])
   user                Users @relation(fields: [calloutUser], references: [id])
@@ -128,6 +227,8 @@ model Deliveries {
   stopTime          DateTime?
   deliveryNote      String?
   scheduleId        String @db.Uuid
+  createdAt         DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime @updatedAt @db.Timestamptz(3)
 
   schedule          Schedule @relation(fields: [scheduleId], references: [orderId])
   measurement       Measurements[]
@@ -143,6 +244,8 @@ model Measurements {
   measurementType   String @default("estimation")
   measurementNote   String?
   deliveryId        String @db.Uuid
+  createdAt         DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime @updatedAt @db.Timestamptz(3)
 
   scheduledOrder    Deliveries @relation(fields: [deliveryId], references: [id])
 
@@ -159,7 +262,9 @@ model OperationalFlows {
   override          Boolean @default(false)
   manualValue       Float?
   manualTimestamp   DateTime?
-
+  createdAt         DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime @updatedAt @db.Timestamptz(3)
+  updatedBy         String?
   @@schema("ops")
 }
 
@@ -171,6 +276,9 @@ model HeadSheets {
   structureRef    String?
   maxFlow         Int?
   characteristics Json?
+  createdAt       DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime @updatedAt @db.Timestamptz(3)
+
   schedules       Schedule[]
 
   @@schema("ops")
