@@ -111,7 +111,7 @@ model Schedule {
 model Callouts {
   id                  Int @id @default(autoincrement())
   callout             Boolean? @default(false)
-  calloutDone         DateTime?
+  calloutDone         DateTime? @db.Timestamptz(3)
   calloutUser         String @db.Uuid
   scheduleId          String @db.Uuid 
 
