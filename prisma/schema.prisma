@@ -112,7 +112,7 @@ model ActiveSessions {
 //////////////////// Timeseries ////////////////////
 model Orders {
   id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  orderTimestamp  DateTime @db.Timestamptz(3)
+  ordertimestamp  DateTime @db.Timestamptz(3)
   orderNumber     Int
   tcidSn          String?
   district        String?
@@ -125,19 +125,19 @@ model Orders {
   details         Json? @db.JsonB
 
   //Relations
-  schedule        Schedule[]
+  schedule        Schedule[] 
 
   //Indexes
-  @@index([orderTimestamp], type:Brin, name: "order_timestamp_index")
+  @@index([ordertimestamp], type:Brin, name: "order_timestamp_index")
   @@index([status], type: Hash, name: "status_index")
   @@index([orderNumber], type: Hash, name: "order_number_index")
   @@index([tcidSn], type: Hash, name: "tcid_sn_index")
-  @@index([orderNumber, orderTimestamp], type:Brin , name: "order_number_timestamp_index")
-  @@index([status, orderTimestamp], type:Brin , name: "order_status_timestamp_index")
+  @@index([orderNumber, ordertimestamp], type:Brin , name: "order_number_timestamp_index")
+  @@index([status, ordertimestamp], type:Brin , name: "order_status_timestamp_index")
   
 // SQL Schema Setup
   @@schema("timeseries")
-  @@unique([orderTimestamp, orderNumber])
+  @@unique([ordertimestamp, orderNumber])
 }
 
 model logs {
@@ -188,12 +188,12 @@ model Schedule {
   specialRequest      String?
   cancelled           Boolean @default(false)
   cancelReason        String?
-  orderId             String @db.Uuid
+  orderId             String @db.Uuid 
   createdAt           DateTime @default(now()) @db.Timestamptz(3)
   updatedAt           DateTime @updatedAt @db.Timestamptz(3)
 
-  //Relations
-  order               Orders @relation(fields: [orderId], references: [id])
+  //Relations 
+  order               Orders @relation(fields: [orderId], references: [id], onDelete: Cascade)
   scheduledLine       HeadSheets @relation(fields: [scheduledLineId], references: [id])
   callout             Callouts[]
   deliveries          Deliveries[]

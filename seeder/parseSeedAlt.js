@@ -32,10 +32,10 @@ async function main() {
         // Check if the conversion is successful before creating the Date object
         if (!isNaN(orderDate) && !isNaN(orderTime)) {
           const pdtOffset = 7 * 60 * 60 * 1000; // Offset for PDT (UTC-07:00) in milliseconds
-          const orderTimestamp = new Date(((orderDate - 25569) * 86400000 + orderTime * 86400000) + pdtOffset);
+          const ordertimestamp = new Date(((orderDate - 25569) * 86400000 + orderTime * 86400000) + pdtOffset);
 
-          // Make sure orderTimestamp is a valid Date object
-          if (!isNaN(orderTimestamp.getTime())) {
+          // Make sure ordertimestamp is a valid Date object
+          if (!isNaN(ordertimestamp.getTime())) {
             const orderNumber = parseInt(row.ORDER_NO);
 
             // Check if the order number is valid
@@ -43,7 +43,7 @@ async function main() {
               const existingOrder = await prisma.orders.findFirst({
                 where: {
                   orderNumber,
-                  orderTimestamp,
+                  ordertimestamp,
                 },
               });
 
@@ -54,7 +54,7 @@ async function main() {
               }
 
               const transformedRow = {
-                orderTimestamp,
+                ordertimestamp,
                 orderNumber,
                 tcidSn: row.TCID_SN,
                 district: row.DISTRICT,
@@ -96,7 +96,7 @@ async function main() {
 
     console.log(`Rows inserted: ${rowsInserted}`);
     console.log(`Rows with invalid date or time: ${invalidDateOrTimeErrors}`);
-    console.log(`Rows skipped due to duplicate orderNumber and orderTimestamp: ${skippedDuplicate}`);
+    console.log(`Rows skipped due to duplicate orderNumber and ordertimestamp: ${skippedDuplicate}`);
   } catch (error) {
     console.error('Error:', error);
   } finally {

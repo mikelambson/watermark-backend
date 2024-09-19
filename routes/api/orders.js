@@ -62,7 +62,7 @@ orders.get('/', async (req, res) => {
                 // If date range is provided, convert it to Date objects and apply PDT offset
                 if (dateMatch) {
                     const [, startDate, endDate] = dateMatch;
-                    filter.orderTimestamp = {
+                    filter.ordertimestamp = {
                     gte: new Date(new Date(startDate).getTime() + pdtOffset),
                     lte: new Date(new Date(endDate).getTime() + pdtOffset),
                     };
@@ -72,13 +72,13 @@ orders.get('/', async (req, res) => {
                     if (isNaN(parsedDate)) {
                     // If no valid date is provided, default to the current year
                     const currentYear = new Date().getFullYear();
-                    filter.orderTimestamp = {
+                    filter.ordertimestamp = {
                         gte: new Date(`${currentYear}-01-01T00:00:00Z`),
                         lte: new Date(`${currentYear}-12-31T23:59:59Z`),
                     };
                     } else {
                     // If a valid single date is provided, use it for filtering
-                    filter.orderTimestamp = new Date(parsedDate.getTime() + pdtOffset);
+                    filter.ordertimestamp = new Date(parsedDate.getTime() + pdtOffset);
                     }
                 }
                 break;
@@ -140,10 +140,10 @@ orders.get('/', async (req, res) => {
             take: pageSizeInt,
             });
     
-            // Convert orderTimestamp to a human-readable format
+            // Convert ordertimestamp to a human-readable format
             const formattedOrders = orders.map((order) => ({
             ...order,
-            orderTimestamp: formatToLocalTime(order.orderTimestamp),
+            ordertimestamp: formatToLocalTime(order.ordertimestamp),
             }));
 
             const response = {
@@ -165,10 +165,10 @@ orders.get('/', async (req, res) => {
             },
             });
     
-            // Convert orderTimestamp to a human-readable format
+            // Convert ordertimestamp to a human-readable format
             const formattedOrders = orders.map((order) => ({
             ...order,
-            orderTimestamp: formatToLocalTime(order.orderTimestamp),
+            ordertimestamp: formatToLocalTime(order.ordertimestamp),
             }));
     
             res.json(formattedOrders);
