@@ -24,15 +24,32 @@ model Users {
   protected    Boolean  @default(false)
   active       Boolean  @default(true)
   temppass     String?   @db.VarChar(255)
+
   roleId       UserRoles[]
   callout      Callouts[]
-
-  @@schema("auth")
   TwoFactorAuth TwoFactorAuth[]
   LdapAuth LdapAuth[]
   ActiveSessions ActiveSessions[]
   PasswordResets PasswordResets[]
   AuthAuditLogs AuthAuditLogs[]
+  UserMeta UserMeta[]
+
+  @@schema("auth")
+}
+
+model UserMeta {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId              String   @db.Uuid
+  preferences         Json?    @db.JsonB  // Store user preferences in JSONB
+  authorizedSerials   Json?    @db.JsonB  // Store connected accounts in JSONB
+  adminNotes          Json?    @db.JsonB  // Store admin info on user in JSONB
+  createdAt           DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt           DateTime @updatedAt @db.Timestamptz(3)
+
+  user            Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@schema("auth")
+  @@index([userId])
 }
 
 model Roles {
