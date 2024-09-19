@@ -2,7 +2,7 @@ import express from 'express';
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
-import manage from './userManagement';
+import manage from './userManagement.js';
 
 const auth = express.Router();
 const prisma = new PrismaClient();

@@ -6,26 +6,41 @@ const prisma = new PrismaClient();
 const manage = express.Router();
 
 // Middleware to check for admin privileges
-const checkAdmin = async (req, res, next) => {
-  const userRole = req.user.role; // Assuming req.user is set after authentication
-  if (userRole.superAdmin) {
-    return next();
+async function checkAdmin(req, res, next) {
+    const userId = req.user?.id; // Assuming you attach user info to the request object
+  
+    if (!userId) {
+      return res.status(401).json({ message: 'Forbidden: Unauthorized access' });
+    }
+  
+    const userRoles = await prisma.UserRoles.findMany({
+      where: { userId },
+      include: { role: true },
+    });
+  
+    const isAdmin = userRoles.some((userRole) => userRole.role.name === 'sysadmin');
+  
+    if (!isAdmin) {
+      return res.status(403).json({ message: 'Forbidden: Admin access required' });
+    }
+  
+    next();
   }
-  return res.status(403).json({ message: 'Forbidden' });
-};
 
 // Get all users with related tables
-router.get('/users', checkAdmin, async (req, res) => {
+manage.get('/users',  async (req, res) => {
     try {
       const users = await prisma.Users.findMany({
         include: {
-          roleId: true,             // Include related roles
-          callout: true,            // Include related callouts
+          roleId: {
+            include: {
+                role: true,         // Include related roles
+            },
+          },               
           TwoFactorAuth: true,      // Include TwoFactorAuth if applicable
           LdapAuth: true,           // Include LdapAuth if applicable
           ActiveSessions: true,      // Include ActiveSessions if applicable
           PasswordResets: true,     // Include PasswordResets if applicable
-          AuthAuditLogs: true,      // Include AuthAuditLogs if applicable
           UserMeta: true,           // Include UserMeta if applicable
         },
       });
