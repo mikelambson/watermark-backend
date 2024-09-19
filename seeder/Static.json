@@ -20,10 +20,14 @@
       { "name": "BENCH", "district": "TC", "maxHeads": 2 },
       { "name": "RD", "district": "TC", "maxHeads": 1 }
     ],
-    "dummyTable": [
-      { "field1": "value1", "field2": "value2" },
-      { "field1": "value3", "field2": "value4" }
-      
+    "Roles": [
+      { "name": "sysadmin", "protected": true, "superAdmin": true },
+      { "name": "administrator", "protected": true },
+      { "name": "watermaster"},
+      { "name": "staff"},
+      { "name": "scheduler"},
+      { "name": "ditchrider"},
+      { "name": "analyst"}
     ]
   }
   

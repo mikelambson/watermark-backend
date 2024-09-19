@@ -45,6 +45,7 @@ model Roles {
   updatedAt     DateTime  @updatedAt @db.Timestamptz(3)
   
   users         UserRoles[]
+  RolePermissions RolePermissions[]
   @@schema("auth")
 }
 
@@ -57,9 +58,32 @@ model UserRoles {
   assignedBy  String
 
   @@id([userId, roleId])
-
   @@schema("auth")
 }
+
+model Permissions {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String   @unique @db.VarChar(255) // For example, 'can_view_user'
+  description String?  @db.VarChar(255) // Optional description of what this permission does
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+
+  rolePermissions RolePermissions[]
+  @@schema("auth")
+}
+
+model RolePermissions {
+  roleId       String    @db.Uuid
+  permissionId String    @db.Uuid
+  granted      Boolean   @default(true) // Allows toggling individual permissions on/off for a role
+
+  role         Roles      @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permissions @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId]) // Composite primary key for the many-to-many relationship
+  @@schema("auth")
+}
+
 
 model TwoFactorAuth {
   id           String          @id @default(cuid()) // Unique ID for each 2FA entry
