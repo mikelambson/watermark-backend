@@ -78,7 +78,7 @@ api.get("/status", async (req, res) => {
         const count = await prisma.Orders.count({
           where: {
             status: statusType,
-            orderTimestamp: {
+            ordertimestamp: {
               gte: new Date(`${currentYear}-01-01`),
               lte: new Date(`${currentYear}-12-31T23:59:59`),
             },
