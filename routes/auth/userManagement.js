@@ -14,6 +14,29 @@ const checkAdmin = async (req, res, next) => {
   return res.status(403).json({ message: 'Forbidden' });
 };
 
+// Get all users with related tables
+router.get('/users', checkAdmin, async (req, res) => {
+    try {
+      const users = await prisma.Users.findMany({
+        include: {
+          roleId: true,             // Include related roles
+          callout: true,            // Include related callouts
+          TwoFactorAuth: true,      // Include TwoFactorAuth if applicable
+          LdapAuth: true,           // Include LdapAuth if applicable
+          ActiveSessions: true,      // Include ActiveSessions if applicable
+          PasswordResets: true,     // Include PasswordResets if applicable
+          AuthAuditLogs: true,      // Include AuthAuditLogs if applicable
+          UserMeta: true,           // Include UserMeta if applicable
+        },
+      });
+      res.status(200).json(users);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  });
+  
+
 // Add a new user
 manage.post('/users', checkAdmin, async (req, res) => {
   const { login, password, email, fullname, roleId } = req.body;
