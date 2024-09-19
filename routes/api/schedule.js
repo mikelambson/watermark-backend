@@ -97,7 +97,7 @@ schedule.get('/', async (req, res) => {
           order: {
             select: {
               id: true,
-              orderTimestamp: true,
+              ordertimestamp: true,
               orderNumber: true,
               tcidSn: true,
               district: true,
@@ -166,7 +166,7 @@ schedule.get('/', async (req, res) => {
 
       const formatOrder = (order) => ({
         ...order,
-        orderTimestamp: order.orderTimestamp,
+        ordertimestamp: order.ordertimestamp,
         deliveries: formatDeliveries(order.deliveries),
         analysis: formatAnalysis(order.analysis)
       });
@@ -230,7 +230,7 @@ schedule.get('/:scheduleId', async (req, res) => {
         order: {
           select: {
             id: true,
-            orderTimestamp: true,
+            ordertimestamp: true,
             orderNumber: true,
             tcidSn: true,
             district: true,
