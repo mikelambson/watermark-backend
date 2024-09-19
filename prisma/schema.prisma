@@ -12,27 +12,27 @@ datasource db {
 
 //////////////////// Auth ////////////////////
 model Users {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  login        String   @unique @db.VarChar(255)
-  password     String   @db.VarChar(512)
-  firstName    String   @db.VarChar(100)
-  middleName   String?  @db.VarChar(100)
-  lastName     String   @db.VarChar(100)
-  email        String?  @db.VarChar(254)
-  title        String?  @default("user") @db.VarChar(100)
-  tcid_staff   Boolean? @default(false)
-  protected    Boolean  @default(false)
-  active       Boolean  @default(true)
-  temppass     String?   @db.VarChar(255)
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  login          String   @unique @db.VarChar(255)
+  password       String   @db.VarChar(512)
+  firstName      String   @db.VarChar(100)
+  middleName     String?  @db.VarChar(100)
+  lastName       String   @db.VarChar(100)
+  email          String?  @db.VarChar(254)
+  title          String?  @default("user") @db.VarChar(100)
+  tcid_staff     Boolean? @default(false)
+  protected      Boolean  @default(false)
+  active         Boolean  @default(true)
+  temppass       String?  @db.VarChar(255)
 
-  roleId       UserRoles[]
-  callout      Callouts[]
-  TwoFactorAuth TwoFactorAuth[]
-  LdapAuth LdapAuth[]
+  roleId         UserRoles[]
+  callout        Callouts[]
+  TwoFactorAuth  TwoFactorAuth[]
+  LdapAuth       LdapAuth[]
   ActiveSessions ActiveSessions[]
   PasswordResets PasswordResets[]
-  AuthAuditLogs AuthAuditLogs[]
-  UserMeta UserMeta[]
+  AuthAuditLogs  AuthAuditLogs[]
+  UserMeta       UserMeta[]
 
   @@schema("auth")
 }
