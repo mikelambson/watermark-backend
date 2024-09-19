@@ -2,8 +2,9 @@ import express from 'express';
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
+import manage from './userManagement';
 
-const router = express.Router();
+const auth = express.Router();
 const prisma = new PrismaClient();
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret'; // Replace with your JWT secret
@@ -22,8 +23,10 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+auth.use('/manage', manage)
+
 // Register new user
-router.post('/register', async (req, res) => {
+auth.post('/register', async (req, res) => {
   const { email, password, role } = req.body;
 
   if (!email || !password || !role) {
@@ -54,7 +57,7 @@ router.post('/register', async (req, res) => {
 });
 
 // Login user
-router.post('/login', async (req, res) => {
+auth.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -80,7 +83,7 @@ router.post('/login', async (req, res) => {
 });
 
 // Get user metadata
-router.get('/meta', authenticateToken, async (req, res) => {
+auth.get('/meta', authenticateToken, async (req, res) => {
   const userId = req.user.userId;
 
   try {
@@ -95,7 +98,7 @@ router.get('/meta', authenticateToken, async (req, res) => {
 });
 
 // Update user metadata
-router.put('/meta', authenticateToken, async (req, res) => {
+auth.put('/meta', authenticateToken, async (req, res) => {
   const userId = req.user.userId;
   const { preferences, connectedAccounts } = req.body;
 
@@ -113,4 +116,4 @@ router.put('/meta', authenticateToken, async (req, res) => {
   }
 });
 
-export default router;
+export default auth;
