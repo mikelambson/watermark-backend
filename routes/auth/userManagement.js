@@ -32,17 +32,21 @@ manage.get('/users',  async (req, res) => {
     try {
       const users = await prisma.Users.findMany({
         include: {
+          // Include all fields except the password
+          
+          password: false,
+          
           roleId: {
             include: {
-                role: true,         // Include related roles
+              role: true,  // Include related roles
             },
-          },               
-          TwoFactorAuth: true,      // Include TwoFactorAuth if applicable
-          LdapAuth: true,           // Include LdapAuth if applicable
-          ActiveSessions: true,      // Include ActiveSessions if applicable
-          PasswordResets: true,     // Include PasswordResets if applicable
-          UserMeta: true,           // Include UserMeta if applicable
-        },
+          },              
+            TwoFactorAuth: true,      // Include TwoFactorAuth if applicable
+            LdapAuth: true,           // Include LdapAuth if applicable
+            ActiveSessions: true,      // Include ActiveSessions if applicable
+            PasswordResets: true,     // Include PasswordResets if applicable
+            UserMeta: true,           // Include UserMeta if applicable
+          },
       });
       res.status(200).json(users);
     } catch (error) {
