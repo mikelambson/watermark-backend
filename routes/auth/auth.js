@@ -27,15 +27,15 @@ auth.use('/manage', manage)
 
 // Register new user
 auth.post('/register', async (req, res) => {
-  const { email, password, role } = req.body;
+  const { login, password, role } = req.body;
 
-  if (!email || !password || !role) {
-    return res.status(400).json({ error: 'Email, password, and role are required.' });
+  if (!login || !password || !role) {
+    return res.status(400).json({ error: 'login, password, and role are required.' });
   }
 
   try {
     // Check if user already exists
-    const existingUser = await prisma.users.findUnique({ where: { email } });
+    const existingUser = await prisma.users.findUnique({ where: { login } });
     if (existingUser) return res.status(400).json({ error: 'User already exists.' });
 
     // Hash the password using Argon2
@@ -44,7 +44,7 @@ auth.post('/register', async (req, res) => {
     // Create new user
     const user = await prisma.users.create({
       data: {
-        email,
+        login,
         password: hashedPassword,
         roleId: role, // Assuming role is an ID of the Roles table
       },
@@ -58,44 +58,72 @@ auth.post('/register', async (req, res) => {
 
 // Login user
 auth.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+  const { login, password } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password are required.' });
+  if (!login || !password) {
+    return res.status(400).json({ error: 'Login and password are required.' });
   }
 
   try {
-    // Find user
-    const user = await prisma.users.findUnique({ where: { email } });
-    if (!user) return res.status(400).json({ error: 'User not found.' });
+    // Find user by login, include their roles
+    const user = await prisma.users.findUnique({
+      where: { login },
+      include: {
+        roleId: {
+          include: {
+            role: true
+          }
+        }
+      }
+    });
 
-    // Check password using Argon2
-    const isMatch = await argon2.verify(user.password, password);
-    if (!isMatch) return res.status(400).json({ error: 'Invalid password.' });
+    if (!user) {
+      return res.status(400).json({ error: 'Invalid login or password.' });
+    }
 
-    // Generate JWT token
-    const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
+    // Verify password using Argon2
+    const validPassword = await argon2.verify(user.password, password);
+    if (!validPassword) {
+      return res.status(400).json({ error: 'Invalid login or password.' });
+    }
 
-    res.json({ token });
+    // Check if the user is active
+    if (!user.active) {
+      return res.status(403).json({ error: 'User account is inactive.' });
+    }
+
+    // Check for the user's role(s)
+    const roles = user.roleId.map(roleEntry => ({
+      roleId: roleEntry.role.id,
+      roleName: roleEntry.role.name,
+      superAdmin: roleEntry.role.superAdmin,
+      protected: roleEntry.role.protected,
+    }));
+
+    const isSuperAdmin = roles.some(role => role.superAdmin);
+    const isProtected = roles.some(role => role.protected);
+
+    // Generate JWT with role information
+    const token = jwt.sign(
+      {
+        userId: user.id,
+        login: user.login,
+        roles, // Include roles in the token
+        isSuperAdmin,
+        isProtected
+      },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    // Send response with token
+    res.json({ token, message: 'Login successful', roles });
   } catch (error) {
-    res.status(500).json({ error: 'Server error', details: error.message });
+    console.error('Error during login:', error);
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 });
 
-// Get user metadata
-auth.get('/meta', authenticateToken, async (req, res) => {
-  const userId = req.user.userId;
-
-  try {
-    // Fetch user metadata
-    const userMeta = await prisma.userMeta.findUnique({ where: { userId } });
-    if (!userMeta) return res.status(404).json({ error: 'User metadata not found.' });
-
-    res.json(userMeta);
-  } catch (error) {
-    res.status(500).json({ error: 'Server error', details: error.message });
-  }
-});
 
 // Update user metadata
 auth.put('/meta', authenticateToken, async (req, res) => {
