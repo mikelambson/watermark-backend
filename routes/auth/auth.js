@@ -74,6 +74,7 @@ auth.post('/login', async (req, res) => {
             role: true
           }
         }
+      
       }
     });
 
@@ -91,7 +92,19 @@ auth.post('/login', async (req, res) => {
     if (!user.active) {
       return res.status(403).json({ error: 'User account is inactive.' });
     }
-
+    const userInfo = {
+      id: user.id,
+      login: user.login,
+      firstName: user.firstName,
+      middleName: user.middleName,
+      lastName: user.lastName,
+      email: user.email,
+      title: user.title,
+      tcid_staff: user.tcid_staff,
+      protected: user.protected,
+      active: user.active,
+      temppass: user.temppass,
+    };
     // Check for the user's role(s)
     const roles = user.roleId.map(roleEntry => ({
       roleId: roleEntry.role.id,
@@ -117,7 +130,14 @@ auth.post('/login', async (req, res) => {
     );
 
     // Send response with token
-    res.json({ token, message: 'Login successful', roles });
+    res.json(
+      { 
+        token, 
+        message: 'Login successful',
+        userInfo,
+        roles 
+
+      });
   } catch (error) {
     console.error('Error during login:', error);
     res.status(500).json({ error: 'Internal server error', details: error.message });
