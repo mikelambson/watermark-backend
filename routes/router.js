@@ -33,4 +33,24 @@ router.use("/auth", auth);
 
 //////////////////////////////////////////////////
 
+// Centralized error handling middleware
+router.use((err, req, res, next) => {
+  console.error(err.stack); // Log error stack for debugging
+  res.status(500).send("Something went wrong! Please try again later."); // Send user-friendly error message
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason); 
+  // You might want to log this error to your logging system
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception thrown:', error);
+  // You might want to log this error to your logging system
+  // Optionally restart the server if necessary
+});
+
+
 export default router;

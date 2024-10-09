@@ -11,6 +11,7 @@ import { PORT } from "./config/config.js";
 import router from "./routes/router.js";
 import { updateLogData } from "./routes/statusRoute.js";
 import { checkDatabaseConnection } from "./utils/dbStatus.js";
+import errorHandler from "./middleware/errorHandler.js";
 
 // ////////////////////////////////////////////////////////////
 const __filename = fileURLToPath(import.meta.url); // Convert import.meta.url to __filename
@@ -29,12 +30,19 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, "public")));
+
 app.use("/", router);
+
 ////////////////// Server Startup ////////////////
 async function startup() {
   await checkDatabaseConnection();
 }
-// initMessage += `| Server is running on port ${PORT}`;
+
+////////////////// Error Handling ///////////////
+// Global error handling middleware
+app.use(errorHandler)
+
+
 
 // Start the server
 app.listen(PORT, () => {
