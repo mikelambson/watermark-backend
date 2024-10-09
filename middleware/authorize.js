@@ -1,15 +1,34 @@
 // middleware/authorize.js
 import { PrismaClient } from '@prisma/client';
+import { verifyPassword } from './passwordHashing.js';
+import { decrypt } from './simpleCrypto.js';
 
 const prisma = new PrismaClient();
 
 // Middleware to check roles and permissions using sessionId
 const authorize = (requiredPermissions = []) => {
     return async (req, res, next) => {
-        const sessionId = req.headers.sessionid;
+        let decryptedLoginField;
+        const sessionId = req.cookies.sessionId;
+        const loginField = req.cookies.loginField;
+        
         
         // Check if sessionId is undefined or empty
         if (!sessionId || sessionId.trim() === "") {
+            return res.status(403).render('forbidden', { message: 'FORBIDDEN' });
+        } 
+        if (!loginField || loginField === undefined) {
+            return res.status(403).render('forbidden', { message: 'FORBIDDEN' });
+        }
+
+        // Split the IV and encrypted data
+        const [iv, encryptedData] = loginField.split(':');
+        
+        // Decrypt the login field
+        try{
+        decryptedLoginField = decrypt(encryptedData, iv);
+        } catch {
+            console.log("Tampered Cookie")
             return res.status(403).render('forbidden', { message: 'FORBIDDEN' });
         }
 
@@ -19,10 +38,15 @@ const authorize = (requiredPermissions = []) => {
                 where: { id: sessionId },
                 include: { user: true } // Include user to access user details
             });
-        
+            const login = session.user.login;
+                    
             // Check if the session exists
-            if (!session || !session.user) {
+            if ( !session || !session.user ) {
                 return res.status(401).send("Invalid session. Please log in again.");
+            }
+            
+            if (decryptedLoginField !== session.user.login) {
+                return res.status(403).render('forbidden', { message: `FORBIDDEN | ${loginField} = ${session.user.login}` });
             }
         
             // Check if the session is inactive or expired

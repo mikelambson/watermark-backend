@@ -2,6 +2,7 @@
 import { PrismaClient } from '@prisma/client';
 import { hashPassword, verifyPassword } from '../middleware/passwordHashing.js';
 import { v4 as uuid } from 'uuid'; // Ensure to import uuid if you haven't
+import { encrypt } from '../middleware/simpleCrypto.js';
 
 const isProduction = process.env.APP_ENV === 'production';
 const isStaging = process.env.APP_ENV === 'staging';
@@ -76,7 +77,17 @@ const login = async (req, res) => {
   res.cookie('sessionId', sessionId, { 
     httpOnly: true, 
     secure: isProduction || isStaging,
-    sameSite: 'strict' // Optional, but recommended for CSRF protection
+    sameSite: 'strict'
+  });
+
+   // Encrypt the login field
+   const { iv, encryptedData } = encrypt(user.login);
+
+  // Set login cookie
+  res.cookie('loginField', `${iv}:${encryptedData}`, {  
+    httpOnly: true, 
+    secure: isProduction || isStaging, 
+    sameSite: 'strict' // Optional, for CSRF protection
   });
 
   // Adjust permissions array based on superAdmin status
@@ -117,6 +128,14 @@ const logout = async (req, res) => {
   
       // Clear the session cookie
       res.clearCookie('sessionId', {
+        httpOnly: true,
+        secure: process.env.APP_ENV === 'production' || process.env.APP_ENV === 'staging', // Set to true if in production or staging
+        sameSite: 'strict' // Optional: CSRF protection
+      });
+
+     
+      // Clear the session cookie
+      res.clearCookie('loginField', {
         httpOnly: true,
         secure: process.env.APP_ENV === 'production' || process.env.APP_ENV === 'staging', // Set to true if in production or staging
         sameSite: 'strict' // Optional: CSRF protection

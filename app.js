@@ -7,6 +7,7 @@ import bodyParser from "body-parser";
 import path from "path";
 import { fileURLToPath } from "url";
 import { PORT } from "./config/config.js";
+import cookieParser from "cookie-parser";
 
 import router from "./routes/router.js";
 import { updateLogData } from "./routes/statusRoute.js";
@@ -24,6 +25,7 @@ let initMessage = [];
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
+app.use(cookieParser());
 
 // Set EJS as the view engine
 app.set("view engine", "ejs");
