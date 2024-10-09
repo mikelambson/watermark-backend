@@ -1,34 +1,15 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import argon2 from 'argon2';
+import { authorize } from '../../middleware/authorize.js';
 
 const prisma = new PrismaClient();
 const manage = express.Router();
 
-// Middleware to check for admin privileges
-async function checkAdmin(req, res, next) {
-    const userId = req.user?.id; // Assuming you attach user info to the request object
-  
-    if (!userId) {
-      return res.status(401).json({ message: 'Forbidden: Unauthorized access' });
-    }
-  
-    const userRoles = await prisma.UserRoles.findMany({
-      where: { userId },
-      include: { role: true },
-    });
-  
-    const isAdmin = userRoles.some((userRole) => userRole.role.name === 'sysadmin');
-  
-    if (!isAdmin) {
-      return res.status(403).json({ message: 'Forbidden: Admin access required' });
-    }
-  
-    next();
-  }
 
 // Get all users with related tables
-manage.get('/users',  async (req, res) => {
+manage.get('/users', authorize(['can_manage_users']),  async (req, res) => {
+  // console.log("getting users")
     try {
       const users = await prisma.Users.findMany({
         include: {
@@ -57,7 +38,7 @@ manage.get('/users',  async (req, res) => {
   
 
 // Add a new user
-manage.post('/users', checkAdmin, async (req, res) => {
+manage.post('/users', authorize(['can_manage_users']), async (req, res) => {
   const { login, password, email, fullname, roleId } = req.body;
   try {
     const existingUser = await prisma.Users.findUnique({ where: { login } });
@@ -83,7 +64,7 @@ manage.post('/users', checkAdmin, async (req, res) => {
 });
 
 // Update a user
-manage.put('/users/:id', checkAdmin, async (req, res) => {
+manage.put('/users/:id', authorize(['can_manage_users']), async (req, res) => {
   const { id } = req.params;
   const { email, fullname, login, roleId } = req.body;
 
@@ -110,7 +91,7 @@ manage.put('/users/:id', checkAdmin, async (req, res) => {
 });
 
 // Delete a user
-manage.delete('/users/:id', checkAdmin, async (req, res) => {
+manage.delete('/users/:id', authorize(['can_manage_users']), async (req, res) => {
   const { id } = req.params;
   try {
     const userToDelete = await prisma.Users.findUnique({ where: { id } });
