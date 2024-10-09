@@ -1,5 +1,5 @@
-// src/middleware/authenticate.js
-const { PrismaClient } = require('@prisma/client');
+// middleware/authenticate.js
+import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 const authenticate = async (req, res, next) => {
@@ -22,4 +22,4 @@ const authenticate = async (req, res, next) => {
   next();
 };
 
-module.exports = { authenticate };
+export { authenticate };

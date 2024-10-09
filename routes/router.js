@@ -5,7 +5,7 @@ import rootRoute from "./rootRoute.js";
 import dataRouter from "./dataRoutes.js";
 import { statusRouter, updateLogData } from "./statusRoute.js";
 import api from "./apiRoutes.js";
-import auth from "./auth/auth.js"
+import auth from "./auth/authRoutes.js"
 
 const router = express.Router();
 
