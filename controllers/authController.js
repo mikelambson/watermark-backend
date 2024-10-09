@@ -3,6 +3,9 @@ import { PrismaClient } from '@prisma/client';
 import { hashPassword, verifyPassword } from '../middleware/passwordHashing.js';
 import { v4 as uuid } from 'uuid'; // Ensure to import uuid if you haven't
 
+const isProduction = process.env.APP_ENV === 'production';
+const isStaging = process.env.APP_ENV === 'staging';
+
 const prisma = new PrismaClient();
 
 const login = async (req, res) => {
@@ -14,7 +17,11 @@ const login = async (req, res) => {
     include: {
       roleId: {
         include: {
-          role: true
+          role: {
+            include: {
+                RolePermissions: true
+            }
+          }
         }
       }
     
@@ -40,7 +47,7 @@ const login = async (req, res) => {
 
   // Set session expiration time (e.g., 1 hour from now)
   const expiresAt = new Date();
-  expiresAt.setHours(expiresAt.getHours() + 1);
+  expiresAt.setHours(expiresAt.getHours() + 24);
 
   // Create the session in the database
   await prisma.activeSessions.create({
@@ -54,7 +61,26 @@ const login = async (req, res) => {
     },
   });
 
-  res.cookie('sessionId', sessionId, { httpOnly: true });
+   // Construct permissions array
+   const permissions = [];
+   let isSuperAdmin = false;
+
+    // Iterate through roles to check for superAdmin and collect permissions
+  user.roleId.forEach(role => {
+    if (role.role.superAdmin && !isSuperAdmin) {
+      isSuperAdmin = true; // Set the flag to true only once
+    }
+    permissions.push(...role.role.RolePermissions); // Collect all permissions
+  });
+
+  res.cookie('sessionId', sessionId, { 
+    httpOnly: true, 
+    secure: isProduction || isStaging,
+    sameSite: 'strict' // Optional, but recommended for CSRF protection
+  });
+
+  // Adjust permissions array based on superAdmin status
+  const responsePermissions = isSuperAdmin ? [ 'superAdmin', ...permissions ] : permissions;
 
   res.json({
     id: user.id,
@@ -62,16 +88,47 @@ const login = async (req, res) => {
     firstName: user.firstName,
     lastName: user.lastName,
     roles: user.roleId.map(role => role.role.name),
+    permissions: responsePermissions,
   });
 };
 
 const logout = async (req, res) => {
-  await prisma.activeSession.deleteMany({
-    where: { userId: req.user.id }
-  });
-  res.clearCookie('sessionId');
-  res.send("Logged out");
-};
+    try {
+      const { userId, sessionId } = req.body;
+  
+      // Check if neither userId nor sessionId is provided
+      if (!userId && !sessionId) {
+        return res.status(400).json({ message: "Either userId or sessionId is required" });
+      }
+  
+      // If userId is provided, log out all sessions for the user
+      if (userId) {
+        await prisma.activeSessions.deleteMany({
+          where: { userId }
+        });
+      }
+  
+      // If sessionId is provided, log out the specific session
+      if (sessionId) {
+        await prisma.activeSessions.deleteMany({
+          where: { id: sessionId } // Use `id` to refer to the sessionId in your ActiveSession model
+        });
+      }
+  
+      // Clear the session cookie
+      res.clearCookie('sessionId', {
+        httpOnly: true,
+        secure: process.env.APP_ENV === 'production' || process.env.APP_ENV === 'staging', // Set to true if in production or staging
+        sameSite: 'strict' // Optional: CSRF protection
+      });
+  
+      // Send a response indicating success
+      res.status(200).json({ message: "Successfully logged out" });
+    } catch (error) {
+      console.error("Error during logout:", error);
+      res.status(500).json({ message: "An error occurred during logout" });
+    }
+  };
 
 // Export the functions directly for easier import
 export { login, logout };

@@ -8,7 +8,8 @@ const auth = express.Router();
 
 // Define authentication routes
 auth.post('/login', login);
-auth.post('/logout', authenticate, logout);
+// auth.post('/logout', authenticate, logout);
+auth.post('/logout', logout);
 auth.use('/manage', manage)
 
 // Export the auth router
