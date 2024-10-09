@@ -10,7 +10,7 @@ const authorize = (requiredPermissions = []) => {
         
         // Check if sessionId is undefined or empty
         if (!sessionId || sessionId.trim() === "") {
-            return res.status(400).send("Session ID is required. Please provide a valid session ID in the request headers.");
+            return res.status(403).send("Access denied. Insufficient permissions.");
         }
 
         try {
