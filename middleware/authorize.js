@@ -3,38 +3,54 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// Middleware to check roles and permissions
-const authorize = (requiredPermissions = [], allowSuperAdmin = false) => {
-  return async (req, res, next) => {
-    if (!req.user) {
-      return res.status(403).send("User not authenticated");
+// Middleware to check roles and permissions using sessionId
+const authorize = (requiredPermissions = []) => {
+    return async (req, res, next) => {
+      const { sessionId } = req.headers;
+  
+    if (!sessionId) {
+        return res.status(403).send("Session not provided or invalid.");
     }
 
-    // Fetch all roles for the authenticated user, including the superAdmin flag and associated permissions
-    const userRoles = await prisma.userRoles.findMany({
-      where: { userId: req.user.id },
-      include: {
-        role: {
-          include: {
-            rolePermissions: {
-              include: { permission: true }
+     // Fetch the user associated with the sessionId
+    const session = await prisma.activeSession.findUnique({
+        where: { id: sessionId },
+        include: {
+            user: {
+                include: {
+                    userRoles: {
+                        include: {
+                            role: {
+                                include: {
+                                    rolePermissions: {
+                                        include: { permission: true }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
-          }
         }
-      }
     });
+
+    if (!session || !session.user) {
+        return res.status(403).send("Invalid session or user not found.");
+    }
+
+    const user = session.user;
 
     // Check if any role has the superAdmin flag
     const isSuperAdmin = userRoles.some(userRole => userRole.role.superAdmin);
 
-    // If superAdmin access is allowed, grant full access
-    if (allowSuperAdmin && isSuperAdmin) {
-      return next();
-    }
+    // Grant access immediately if the user is a superAdmin
+    if (isSuperAdmin) {
+        return next(); // SuperAdmins are always authorized
+      }
 
     // Gather user's granted permissions
     const userPermissions = new Set();
-    userRoles.forEach(userRole => {
+    user.userRoles.forEach(userRole => {
       userRole.role.rolePermissions.forEach(rp => {
         if (rp.granted) userPermissions.add(rp.permission.name);
       });
