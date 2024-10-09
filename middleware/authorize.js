@@ -10,7 +10,7 @@ const authorize = (requiredPermissions = []) => {
         
         // Check if sessionId is undefined or empty
         if (!sessionId || sessionId.trim() === "") {
-            return res.status(403).send("Access denied. Insufficient permissions.");
+            return res.status(403).render('forbidden', { message: 'FORBIDDEN' });
         }
 
         try {
