@@ -2,10 +2,8 @@
 import { PrismaClient } from '@prisma/client';
 import { hashPassword, verifyPassword } from '../middleware/passwordHashing.js';
 import { v4 as uuid } from 'uuid'; // Ensure to import uuid if you haven't
-import { encrypt } from '../middleware/simpleCrypto.js';
+import { SetCookies, ClearCookies } from '../middleware/cookies.js';
 
-const isProduction = process.env.APP_ENV === 'production';
-const isStaging = process.env.APP_ENV === 'staging';
 
 const prisma = new PrismaClient();
 
@@ -74,21 +72,9 @@ const login = async (req, res) => {
     permissions.push(...role.role.RolePermissions); // Collect all permissions
   });
 
-  res.cookie('sessionId', sessionId, { 
-    httpOnly: true, 
-    secure: isProduction || isStaging,
-    sameSite: 'strict'
-  });
-
-   // Encrypt the login field
-   const { iv, encryptedData } = encrypt(user.login);
-
-  // Set login cookie
-  res.cookie('loginField', `${iv}:${encryptedData}`, {  
-    httpOnly: true, 
-    secure: isProduction || isStaging, 
-    sameSite: 'strict' // Optional, for CSRF protection
-  });
+  const userLogin = user.login;
+  // Set cookies using the middleware
+  SetCookies({ res, sessionId, userLogin });
 
   // Adjust permissions array based on superAdmin status
   const responsePermissions = isSuperAdmin ? [ 'superAdmin', ...permissions ] : permissions;
@@ -125,21 +111,25 @@ const logout = async (req, res) => {
           where: { id: sessionId } // Use `id` to refer to the sessionId in your ActiveSession model
         });
       }
-  
-      // Clear the session cookie
-      res.clearCookie('sessionId', {
-        httpOnly: true,
-        secure: process.env.APP_ENV === 'production' || process.env.APP_ENV === 'staging', // Set to true if in production or staging
-        sameSite: 'strict' // Optional: CSRF protection
-      });
+      
+      ClearCookies(res)
+    //   // Clear the session cookie
+    //   res.clearCookie('sessionId', {
+    //     sameSite: 'strict', // Optional, for CSRF protection
+    //     domain: '.watermark.work',
+    //     httpOnly: true,
+    //     secure: process.env.APP_ENV === 'production' || process.env.APP_ENV === 'staging',
+
+    //   });
 
      
-      // Clear the session cookie
-      res.clearCookie('loginField', {
-        httpOnly: true,
-        secure: process.env.APP_ENV === 'production' || process.env.APP_ENV === 'staging', // Set to true if in production or staging
-        sameSite: 'strict' // Optional: CSRF protection
-      });
+    //   // Clear the session cookie
+    //   res.clearCookie('loginField', {
+    //     sameSite: 'strict', // Optional, for CSRF protection
+    //     domain: '.watermark.work',
+    //     httpOnly: true,
+    //     secure: process.env.APP_ENV === 'production' || process.env.APP_ENV === 'staging',
+    //   });
   
       // Send a response indicating success
       res.status(200).json({ message: "Successfully logged out" });
