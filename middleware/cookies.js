@@ -9,8 +9,8 @@ const cookieMaxAge = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 res.cookie('sessionId', sessionId, { 
     httpOnly: true, 
-    secure: isProduction || isStaging,
-    sameSite: 'strict',
+    secure: true,
+    sameSite: 'lax',
     domain: '.watermark.work',
     maxAge: cookieMaxAge
   });
@@ -21,8 +21,8 @@ res.cookie('sessionId', sessionId, {
   // Set login cookie
   res.cookie('loginField', `${iv}:${encryptedData}`, {  
     httpOnly: true, 
-    secure: isProduction || isStaging, 
-    sameSite: 'strict', // Optional, for CSRF protection
+    secure: true, 
+    sameSite: 'lax', // Optional, for CSRF protection
     domain: '.watermark.work',
     maxAge: cookieMaxAge
   });
@@ -30,7 +30,7 @@ res.cookie('sessionId', sessionId, {
 
 const ClearCookies = ( res ) => {
     res.clearCookie('sessionId', {
-        sameSite: 'strict', // Optional, for CSRF protection
+        sameSite: 'lax', // Optional, for CSRF protection
         domain: '.watermark.work',
         httpOnly: true,
         secure: process.env.APP_ENV === 'production' || process.env.APP_ENV === 'staging',
@@ -39,7 +39,7 @@ const ClearCookies = ( res ) => {
 
       // Clear the session cookie
       res.clearCookie('loginField', {
-        sameSite: 'strict', // Optional, for CSRF protection
+        sameSite: 'lax', // Optional, for CSRF protection
         domain: '.watermark.work',
         httpOnly: true,
         secure: process.env.APP_ENV === 'production' || process.env.APP_ENV === 'staging',

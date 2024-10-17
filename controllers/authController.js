@@ -113,23 +113,7 @@ const logout = async (req, res) => {
       }
       
       ClearCookies(res)
-    //   // Clear the session cookie
-    //   res.clearCookie('sessionId', {
-    //     sameSite: 'strict', // Optional, for CSRF protection
-    //     domain: '.watermark.work',
-    //     httpOnly: true,
-    //     secure: process.env.APP_ENV === 'production' || process.env.APP_ENV === 'staging',
-
-    //   });
-
-     
-    //   // Clear the session cookie
-    //   res.clearCookie('loginField', {
-    //     sameSite: 'strict', // Optional, for CSRF protection
-    //     domain: '.watermark.work',
-    //     httpOnly: true,
-    //     secure: process.env.APP_ENV === 'production' || process.env.APP_ENV === 'staging',
-    //   });
+    
   
       // Send a response indicating success
       res.status(200).json({ message: "Successfully logged out" });

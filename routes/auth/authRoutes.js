@@ -16,11 +16,13 @@ auth.post('/logout', logout);
 auth.use('/manage', manage)
 
 auth.get('/session', async (req, res) => {
+    console.log('Cookies: ', req.cookies);
     const { sessionId } = req.cookies;
   
     if (!sessionId) {
       return res.status(401).json({ message: 'Session ID missing' });
     }
+
   
     // Fetch session from database
     const session = await prisma.activeSessions.findUnique({
@@ -42,6 +44,10 @@ auth.get('/session', async (req, res) => {
      }},
     );
     
+    if (!session) {
+        return res.status(401).json({ message: 'user incorrect/bad session' });
+    }
+
     const permissions = [];
     let isSuperAdmin = false;
     
