@@ -1,8 +1,8 @@
 // src/controllers/authController.js
 import { PrismaClient } from '@prisma/client';
-import { hashPassword, verifyPassword } from '../middleware/passwordHashing.js';
+import { hashPassword, verifyPassword } from '@/middleware/passwordHashing.js';
 import { v4 as uuid } from 'uuid'; // Ensure to import uuid if you haven't
-import { SetCookies, ClearCookies } from '../middleware/cookies.js';
+import { SetCookies, ClearCookies } from '@/middleware/cookies.js';
 
 
 const prisma = new PrismaClient();

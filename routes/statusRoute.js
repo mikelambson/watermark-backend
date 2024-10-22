@@ -1,7 +1,7 @@
 // routes/statusRoute.js
 
 import express from "express";
-import { getLog, addToLog } from "../logger.js";
+import { getLog, addToLog } from "@/logger.js";
 
 
 const statusRouter = express.Router();

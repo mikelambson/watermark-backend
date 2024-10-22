@@ -1,7 +1,7 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import argon2 from 'argon2';
-import { authorize } from '../../middleware/authorize.js';
+import { authorize } from '@/middleware/authorize.js';
 
 const prisma = new PrismaClient();
 const manage = express.Router();
