@@ -42,7 +42,7 @@
     "prisma": "^5.18.0"
   },
   "_moduleAliases": {
-    "@": "."  
+    "@": "."
   },
-  "linecount": 5785
+  "linecount": 5790
 }
