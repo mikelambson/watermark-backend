@@ -3,8 +3,8 @@
 import express from "express";
 import path from "path";
 import fs from "fs";
-import dataLocation from "@/config/locations.js";
-import CSVParser from "@/sources/csvParse.js"; 
+import dataLocation from "../config/locations.js";
+import CSVParser from "../sources/csvParse.js"; 
 
 const dataRouter = express.Router();
 let directory = dataLocation.tcidLAN.goesFiles.path;

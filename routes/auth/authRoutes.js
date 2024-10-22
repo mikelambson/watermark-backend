@@ -1,10 +1,10 @@
 // routes/auth/authRoutes.js
 import express from 'express';
-import { authenticate } from '@/middleware/authenticate.js';
-import { login, logout } from '@/controllers/authController.js';
+import { authenticate } from '../../middleware/authenticate.js';
+import { login, logout } from '../../controllers/authController.js';
 import manage from './userManagement.js';
 import { PrismaClient } from '@prisma/client';
-import { SetCookies, ClearCookies }  from '@/middleware/cookies.js';
+import { SetCookies, ClearCookies }  from '../../middleware/cookies.js';
 
 const auth = express.Router();
 const prisma = new PrismaClient();

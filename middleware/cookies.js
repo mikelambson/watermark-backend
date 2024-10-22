@@ -1,5 +1,5 @@
 
-import { encrypt } from '@/middleware/simpleCrypto.js';
+import { encrypt } from '../middleware/simpleCrypto.js';
 
 const SetCookies = ({ res, sessionId, userLogin }) => {
 const isProduction = process.env.APP_ENV === 'production';

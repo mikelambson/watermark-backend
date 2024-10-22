@@ -14,7 +14,9 @@ import { updateLogData } from "./routes/statusRoute.js";
 import { checkDatabaseConnection } from "./utils/dbStatus.js";
 import errorHandler from "./middleware/errorHandler.js";
 
+
 // ////////////////////////////////////////////////////////////
+
 const __filename = fileURLToPath(import.meta.url); // Convert import.meta.url to __filename
 const __dirname = path.dirname(__filename); // Convert __filename to __dirname
 let initMessage = [];

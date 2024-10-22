@@ -1,7 +1,7 @@
 // Import necessary modules
 import express from "express";
 import { PrismaClient } from '@prisma/client';
-import { updateLogData } from "@/statusRoute.js";
+import { updateLogData } from "../statusRoute.js";
 
 
 // Initialize

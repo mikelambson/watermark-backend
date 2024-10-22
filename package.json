@@ -41,8 +41,6 @@
     "nodemon": "^3.0.1",
     "prisma": "^5.18.0"
   },
-  "_moduleAliases": {
-    "@": "."
-  },
+
   "linecount": 5790
 }
