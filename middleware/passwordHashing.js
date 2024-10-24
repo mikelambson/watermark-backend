@@ -1,4 +1,4 @@
-// src/middleware/passwordUtils.js
+// /middleware/passwordUtils.js
 import argon2 from 'argon2';
 
 const hashPassword = async (password) => {

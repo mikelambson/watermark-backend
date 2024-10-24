@@ -3,6 +3,7 @@ import express from 'express';
 import { authenticate } from '../../middleware/authenticate.js';
 import { login, logout } from '../../controllers/authController.js';
 import manage from './userManagement.js';
+import profile from './profile.js';
 import { PrismaClient } from '@prisma/client';
 import { SetCookies, ClearCookies }  from '../../middleware/cookies.js';
 
@@ -14,6 +15,7 @@ auth.post('/login', login);
 // auth.post('/logout', authenticate, logout);
 auth.post('/logout', logout);
 auth.use('/manage', manage)
+auth.use('/profile', profile)
 
 auth.get('/session', async (req, res) => {
     console.log('Cookies: ', req.cookies);
