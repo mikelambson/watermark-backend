@@ -10,6 +10,7 @@ import { SetCookies, ClearCookies }  from '../../middleware/cookies.js';
 const auth = express.Router();
 const prisma = new PrismaClient();
 
+
 // Define authentication routes
 auth.post('/login', login);
 // auth.post('/logout', authenticate, logout);
@@ -18,6 +19,8 @@ auth.use('/manage', manage)
 auth.use('/profile', profile)
 
 auth.get('/session', async (req, res) => {
+    res.header("Access-Control-Allow-Origin", "https://watermark.work");
+    res.header("Access-Control-Allow-Credentials", "true");
     console.log('Cookies: ', req.cookies);
     const { sessionId } = req.cookies;
   

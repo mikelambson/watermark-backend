@@ -25,14 +25,15 @@ let initMessage = [];
 
 //////////////////// Construct App ////////////////////
 const app = express();
-app.use(bodyParser.json());
-app.use(cookieParser());
-
 
 app.use(cors({
   origin: 'https://watermark.work',
   credentials: true, 
 }));
+app.use(bodyParser.json());
+app.use(cookieParser());
+
+
 
 // Set EJS as the view engine
 app.set("view engine", "ejs");
