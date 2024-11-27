@@ -6,6 +6,7 @@ import manage from './userManagement.js';
 import profile from './profile.js';
 import { PrismaClient } from '@prisma/client';
 import { SetCookies, ClearCookies }  from '../../middleware/cookies.js';
+import roles from './userRoles.js';
 
 const auth = express.Router();
 const prisma = new PrismaClient();
@@ -15,8 +16,9 @@ const prisma = new PrismaClient();
 auth.post('/login', login);
 // auth.post('/logout', authenticate, logout);
 auth.post('/logout', logout);
-auth.use('/manage', manage)
-auth.use('/profile', profile)
+auth.use('/manage', manage);
+auth.use('/profile', profile);
+auth.use('/roles', roles);
 
 auth.get('/session', async (req, res) => {
     res.header("Access-Control-Allow-Origin", "https://watermark.work");
