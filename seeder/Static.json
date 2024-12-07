@@ -28,6 +28,22 @@
       { "name": "scheduler"},
       { "name": "ditchrider"},
       { "name": "analyst"}
+    ],
+    "Permissions": [
+      { "name": "can_manage_users", "description": "Admin function to manager users"},
+      { "name": "can_view_reports", "description": "Permission to view reports" },
+      { "name": "can_edit_reports", "description": "Permission to edit reports" },
+      { "name": "can_delete_reports", "description": "Permission to delete reports" },
+      { "name": "can_manage_roles", "description": "Permission to manage roles" },
+      { "name": "can_manage_permissions", "description": "Permission to manage permissions" },
+      { "name": "can_schedule_tasks", "description": "Permission to schedule tasks" },
+      { "name": "can_assign_tasks", "description": "Permission to assign tasks" },
+      { "name": "can_view_tasks", "description": "Permission to view tasks" },
+      { "name": "can_edit_tasks", "description": "Permission to edit tasks" },
+      { "name": "can_delete_tasks", "description": "Permission to delete tasks" },
+      { "name": "can_update_system_alerts", "description": "Permission to add and update site wide alerts"},
+      { "name": "can_update_meters", "description": "Permission to add and update meters"},
+      { "name": "can_trigger_process", "description": "Admin function to manually call a process"}
     ]
   }
   

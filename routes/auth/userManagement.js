@@ -113,7 +113,7 @@ manage.delete('/users/:id', authorize(['can_manage_users']), async (req, res) =>
 });
 
 // User profile management
-manage.put('/profile', async (req, res) => {
+manage.put('/profile', authorize(['can_manage_users, can_update_self']), async (req, res) => {
   const { userId } = req.user; // Assuming userId is available in req.user
   const { name, email, login, userMeta } = req.body;
 
