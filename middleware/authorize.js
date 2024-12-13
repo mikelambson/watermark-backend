@@ -60,19 +60,19 @@ const authorize = (requiredPermissions = []) => {
             req.user = session.user; 
 
             
-                // Fetch all roles for the authenticated user, including the superAdmin flag and associated permissions
-                const userRoles = await prisma.userRoles.findMany({
-                    where: { userId: req.user.id },
-                    include: {
-                        role: {
-                            include: {
-                                RolePermissions: { // Ensure this matches your Prisma model correctly
-                                    include: { permission: true }
-                                }
-                            }
-                        }
-                    }
-                });
+            // Fetch all roles for the authenticated user, including the superAdmin flag and associated permissions
+            const userRoles = await prisma.userRoles.findMany({
+                where: { userId: req.user.id }, // Assuming `req.user.id` is the logged-in user's ID
+                include: {
+                    role: {
+                        include: {
+                            RolePermissions: { // Correct case based on your schema
+                                include: { permission: true }, // Fetch permission details
+                            },
+                        },
+                    },
+                },
+            });
             
             // Check if any role has the superAdmin flag
             const isSuperAdmin = userRoles.some(userRole => userRole.role.superAdmin);
@@ -84,12 +84,15 @@ const authorize = (requiredPermissions = []) => {
 
             // Gather user's granted permissions
             const userPermissions = new Set();
-            userRoles.forEach(userRole => { // Corrected from user.userRoles
-                userRole.role.rolePermissions.forEach(rp => {
-                    if (rp.granted) userPermissions.add(rp.permission.name);
+            userRoles.forEach(userRole => {
+                const rolePermissions = userRole.role?.RolePermissions || [];
+                rolePermissions.forEach(rp => {
+                    if (rp.granted && rp.permission?.name) {
+                        userPermissions.add(rp.permission.name);
+                    }
                 });
             });
-
+            
             // Check if user has all required permissions
             const hasRequiredPermissions = requiredPermissions.every(permission => userPermissions.has(permission));
             
