@@ -56,6 +56,14 @@ const authorize = (requiredPermissions = []) => {
                 await prisma.activeSessions.delete({ where: { id: sessionId } }); // Delete the invalid session
                 return res.status(401).send("Session expired or inactive. Please log in again.");
             }
+             // Update session expiration time
+            const newExpiresAt = currentTime;
+            newExpiresAt.setHours(newExpiresAt.getHours() + 24); // Extend by 1 hour
+
+            await prisma.activeSessions.update({
+            where: { id: sessionId },
+            data: { expiresAt: newExpiresAt },
+            });
         
             req.user = session.user; 
 
