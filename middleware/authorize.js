@@ -38,7 +38,7 @@ const authorize = (requiredPermissions = []) => {
                 where: { id: sessionId },
                 include: { user: true } // Include user to access user details
             });
-            const login = session.user.login;
+            
                     
             // Check if the session exists
             if ( !session || !session.user ) {

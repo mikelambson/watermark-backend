@@ -166,9 +166,27 @@ manage.put('/users/:id', authorize(['can_manage_users']), async (req, res) => {
       return res.status(404).json({ message: 'User not found.' });
     }
 
+
     // If the user is protected, only allow superAdmins to modify
-    if (existingUser.protected && !req.user.role.superAdmin) {
-      return res.status(403).json({ message: 'Forbidden: Cannot modify a protected user.' });
+    if (existingUser.protected) {
+      const userRoles = await prisma.userRoles.findMany({
+        where: { userId: req.user.id }, // Assuming `req.user.id` is the logged-in user's ID
+        include: {
+            role: {
+                include: {
+                    RolePermissions: { // Correct case based on your schema
+                        include: { permission: true }, // Fetch permission details
+                    },
+                },
+            },
+        },
+    });
+    
+    const isSuperAdmin = userRoles.some(userRole => userRole.role.superAdmin);
+      // Check if req.user, req.user.role exist and if superAdmin is true
+      if (!isSuperAdmin) {
+        return res.status(403).json({ message: 'Forbidden: Cannot modify a protected user.' });
+      }
     }
 
     // Hash password if it's part of the update
@@ -212,7 +230,7 @@ manage.delete('/users/:id', authorize(['can_manage_users']), async (req, res) =>
     }
 
     // SuperAdmin can delete any user
-    if (!req.user.role.superAdmin && userToDelete.protected) {
+    if ((!req.user || !req.user.role || !req.user.role.superAdmin) && userToDelete.protected) {
       return res.status(403).json({ message: 'Forbidden' });
     }
 
