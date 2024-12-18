@@ -90,38 +90,55 @@ const login = async (req, res) => {
 };
 
 const logout = async (req, res) => {
-    try {
-      const { userId, sessionId } = req.body;
-  
-      // Check if neither userId nor sessionId is provided
-      if (!userId && !sessionId) {
-        return res.status(400).json({ message: "Either userId or sessionId is required" });
+  try {
+    const { userId, sessionId, activeSession } = req.body;
+
+    switch (true) {
+      case activeSession === true: {
+        const cookieSessionId = req.cookies?.sessionId;
+        if (!cookieSessionId) {
+          return res.status(400).json({ message: "No active session cookie found" });
+        }
+
+        await prisma.activeSessions.deleteMany({
+          where: { id: cookieSessionId }
+        });
+
+        ClearCookies(res);
+        return res.status(200).json({ message: "Successfully logged out current session" });
       }
-  
-      // If userId is provided, log out all sessions for the user
-      if (userId) {
+
+      case !!sessionId: {
+        // Logout the specific session
+        await prisma.activeSessions.deleteMany({
+          where: { id: sessionId }
+        });
+
+        ClearCookies(res);
+        return res.status(200).json({ message: "Successfully logged out the specified session" });
+      }
+
+      case !!userId: {
+        // Logout all sessions for the user
         await prisma.activeSessions.deleteMany({
           where: { userId }
         });
+
+        ClearCookies(res);
+        return res.status(200).json({ message: "Successfully logged out all sessions for the user" });
       }
-  
-      // If sessionId is provided, log out the specific session
-      if (sessionId) {
-        await prisma.activeSessions.deleteMany({
-          where: { id: sessionId } // Use `id` to refer to the sessionId in your ActiveSession model
-        });
-      }
-      
-      ClearCookies(res)
-    
-  
-      // Send a response indicating success
-      res.status(200).json({ message: "Successfully logged out" });
-    } catch (error) {
-      console.error("Error during logout:", error);
-      res.status(500).json({ message: "An error occurred during logout" });
+
+      default:
+        // If we reach here, none of the above conditions matched
+        return res.status(400).json({ message: "Either userId, sessionId, or activeSession is required" });
     }
-  };
+
+  } catch (error) {
+    console.error("Error during logout:", error);
+    return res.status(500).json({ message: "An error occurred during logout" });
+  }
+};
+
 
 // Export the functions directly for easier import
 export { login, logout };
