@@ -59,7 +59,9 @@ manage.post('/users', authorize(['can_manage_users']), async (req, res) => {
     tcid_staff,
     active,
     roleId,
-  } = req.body;
+    temppass,
+    protected: isProtected, // Use `protected` as `isProtected` in Prisma
+} = req.body;
 
   const sessionId = req.cookies?.sessionId; // Extract session ID from cookies
 
@@ -93,24 +95,36 @@ manage.post('/users', authorize(['can_manage_users']), async (req, res) => {
     }
 
     // Hash the password
-    const hashedPassword = await argon2.hash(password);
+    const hashedPassword = await argon2.hash(temppass);
 
     // Create the new user
     const newUser = await prisma.Users.create({
       data: {
-        login,
-        password: hashedPassword,
-        firstName: firstName || null,
-        middleName: middleName || null,
-        lastName: lastName || null,
-        email: email || null,
-        title: title || null,
-        tcid_staff: tcid_staff ?? false,
-        active: active ?? true,
-        temppass: password,
-        roleId: roleId || null,
+          login,
+          password: hashedPassword,
+          firstName: firstName || null,
+          middleName: middleName || null,
+          lastName: lastName || null,
+          email: email || null,
+          title: title || "user",
+          tcid_staff: tcid_staff ?? false,
+          active: active ?? true,
+          temppass: temppass,
+          protected: isProtected ?? false,
+          roleId: {
+            create: roleId? {
+              role: {
+                connect: { id: roleId }, // Link the role by its ID
+              },
+              assignedBy: updaterId, // Track who assigned the role
+            } : undefined, // Skip if no roleId provided
+          },
+      },
+      include: {
+        roleId: true, // Include related roles for response
       },
     });
+   
 
     // Log the creation in AuthAuditLogs
     await prisma.AuthAuditLogs.create({
