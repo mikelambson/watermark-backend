@@ -6,6 +6,7 @@ import dataRouter from "./dataRoutes.js";
 import { statusRouter, updateLogData } from "./statusRoute.js";
 import api from "./apiRoutes.js";
 import auth from "./auth/authRoutes.js"
+import requestheaders from "./getIProute.js";
 
 const router = express.Router();
 
@@ -30,6 +31,7 @@ router.use("/status", statusRouter);
 router.use("/data", dataRouter);
 router.use("/api", api);
 router.use("/auth", auth);
+router.use("/ip", requestheaders);
 
 //////////////////////////////////////////////////
 

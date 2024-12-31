@@ -42,7 +42,10 @@ const login = async (req, res) => {
 
   const sessionId = uuid(); // Generate a unique session ID
   const userAgent = req.headers['user-agent'] || null; // Get user agent
-  const ipAddress = req.ip || null; // Get IP address
+  const forwarded = req.headers['x-forwarded-for'];
+  const ipAddress = forwarded ? forwarded.split(',')[0] : req.socket.remoteAddress;
+
+  // const ipAddress = req.ip || null; // Get IP address
 
   // Set session expiration time (e.g., 1 hour from now)
   const expiresAt = new Date();
