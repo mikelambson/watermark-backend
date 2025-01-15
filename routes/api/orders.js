@@ -27,8 +27,9 @@ const formatToLocalTime = (date) => {
 /////////////////////////// Orders /////////////////////////
 // Orders route query handler
 orders.get('/', async (req, res) => {
-    const clientIP = req.ip;
-    updateLogData("Data Req | IP: " + clientIP);
+  const forwarded = req.headers['x-forwarded-for'];
+  const ipAddress = forwarded ? forwarded.split(',')[0] : req.socket.remoteAddress;
+    updateLogData("Data Req | IP: " + ipAddress);
     try {
         const queryParameters = req.query;
         // Define an empty filter object

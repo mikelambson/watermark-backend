@@ -22,40 +22,42 @@ const locationOptions = tcidLANKeys.map((key) => {
 
 dataRouter.get("/", async (req, res) => {
   const csvFilesDirectory = directory; // Update the path to your network location
-  try {
-    const csvFiles = fs
-      .readdirSync(csvFilesDirectory)
-      .filter((file) => file.endsWith(".csv"));
+  // try {
+  //   const csvFiles = fs
+  //     .readdirSync(csvFilesDirectory)
+  //     .filter((file) => file.endsWith(".csv"));
 
-    const selectedCSVFile = req.query.csvFile || csvFiles[0];
-    const selectedCSVPath = path.join(csvFilesDirectory, selectedCSVFile);
+  //   const selectedCSVFile = req.query.csvFile || csvFiles[0];
+  //   const selectedCSVPath = path.join(csvFilesDirectory, selectedCSVFile);
 
-    if (selectedCSVPath) {
-      const csvParser = new CSVParser(selectedCSVPath);
-      const parsedData = await csvParser.readAndParse();
+  //   if (selectedCSVPath) {
+  //     const csvParser = new CSVParser(selectedCSVPath);
+  //     const parsedData = await csvParser.readAndParse();
 
-      // Define your location options here
-      const locationOptions = [
-        dataLocation.tcidLAN.goesFiles,
-        dataLocation.tcidLAN.dataDrive,
-        // Add more locations as needed
-      ];
+  //     // Define your location options here
+  //     const locationOptions = [
+  //       dataLocation.tcidLAN.goesFiles,
+  //       dataLocation.tcidLAN.dataDrive,
+  //       // Add more locations as needed
+  //     ];
 
-      res.render("data", {
-        loading: true,
-        data: parsedData,
-        headers: Object.keys(parsedData[0]),
-        csvFiles: csvFiles,
-        locationOptions: locationOptions,
-        selectedCSVFile: selectedCSVFile,
-      });
-    } else {
-      res.status(404).send("CSV file not found");
-    }
-  } catch (err) {
-    console.error("Error reading and parsing CSV files:", err);
-    res.status(500).send("Internal Server Error");
-  }
+  //     res.render("data", {
+  //       loading: true,
+  //       data: parsedData,
+  //       headers: Object.keys(parsedData[0]),
+  //       csvFiles: csvFiles,
+  //       locationOptions: locationOptions,
+  //       selectedCSVFile: selectedCSVFile,
+  //     });
+  //   } else {
+  //     res.status(404).send("CSV file not found");
+  //   }
+  // } catch (err) {
+  //   console.error("Error reading and parsing CSV files:", err);
+  //   res.status(500).send("Internal Server Error");
+  // }
+
+  res.render("data", { "loading": true, "locationOptions": "locationOptions" });
 });
 
 ///////////// config ////////////// ...

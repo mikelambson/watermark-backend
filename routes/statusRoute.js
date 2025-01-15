@@ -18,10 +18,10 @@ statusRouter.get("/events", async function (req, res) {
     Connection: "keep-alive",
   });
   res.flushHeaders();
-  const userAgent = req.headers['user-agent'] || null; // Get user agent
-  const forwarded = req.headers['x-forwarded-for'];
-  const ipAddress = forwarded ? forwarded.split(',')[0] : req.socket.remoteAddress;
-  updateLogData(`/status/events \n Time: ${new Date(Date.now()).toLocaleString()} | IP: ${ipAddress} | User Agent: ${userAgent}`);
+  // const userAgent = req.headers['user-agent'] || null; // Get user agent
+  // const forwarded = req.headers['x-forwarded-for'];
+  // const ipAddress = forwarded ? forwarded.split(',')[0] : req.socket.remoteAddress;
+  // updateLogData(`/status/events \n Time: ${new Date(Date.now()).toLocaleString()} | IP: ${ipAddress} | User Agent: ${userAgent}`);
   res.write(`data: ${JSON.stringify({ 'IP': ipAddress, 'User Agent': userAgent })}\n\n`);
   // Tell the client to retry every 10 seconds if connectivity is lost
   res.write("retry: 10000\n\n");

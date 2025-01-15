@@ -16,8 +16,9 @@ schedule.use('/unscheduled', orders);
 ////////////////////////////// Schedule ////////////////////////////////////////
 
 schedule.get('/', async (req, res) => {
-    const clientIP = req.ip;
-    updateLogData("Schedule Req | IP: " + clientIP);
+    const forwarded = req.headers['x-forwarded-for'];
+    const ipAddress = forwarded ? forwarded.split(',')[0] : req.socket.remoteAddress;
+    updateLogData("Schedule Req | IP: " + ipAddress);
     try{
       const queryParameters = req.query;
       // Define an empty filter object
