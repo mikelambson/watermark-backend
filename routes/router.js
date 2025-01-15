@@ -15,7 +15,11 @@ const router = express.Router();
 // middleware that is specific to this router
 router.use((req, res, next) => {
   res.locals.pageTitle = "WaterMARK Backend";
-  console.log("Time: ", new Date(Date.now()).toLocaleString());
+  const userAgent = req.headers['user-agent'] || null; // Get user agent
+  const forwarded = req.headers['x-forwarded-for'];
+  const ipAddress = forwarded ? forwarded.split(',')[0] : req.socket.remoteAddress;
+  console.log("Backend | Time: ", new Date(Date.now()).toLocaleString() + " | IP: ", ipAddress);
+  updateLogData(`Time: ${new Date(Date.now()).toLocaleString()} | IP: ${ipAddress} | User Agent: ${userAgent}`);
   next();
 });
 

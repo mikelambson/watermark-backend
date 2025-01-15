@@ -10,9 +10,12 @@ const rootRoute = express.Router();
 
 // define the home page route
 rootRoute.get("/", (req, res) => {
-  const clientIP = req.ip;
-  console.log("\n--Root Page Requested | IP", clientIP, "\n");
-  updateLogData(`Root Page Requested | IP: ${clientIP}`);
+  const userAgent = req.headers['user-agent'] || null; // Get user agent
+  const forwarded = req.headers['x-forwarded-for'];
+  const ipAddress = forwarded ? forwarded.split(',')[0] : req.socket.remoteAddress;
+  // const clientIP = req.ip;
+  console.log("\n--Root Page Requested | IP", ipAddress, "\n");
+  updateLogData(`Root Page Requested | IP: ${ipAddress} | User Agent: ${userAgent}`);
   // Render the "home.ejs" template and pass the initial content for the <div>
   res.render("home", {
     pageTitle: "Home",
