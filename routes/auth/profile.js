@@ -84,14 +84,14 @@ profile.get('/',  async (req, res) => {
         
 });
 
-profile.put('/updatepassword', async (req, res) => {
+profile.post('/updatepassword', async (req, res) => {
     const { oldpassword, newpassword} = req.body;
     const sessionId = req.cookies.sessionId;
     const loginField = req.cookies.loginField;
     
     let decryptedLoginField;
     let login;
-        
+    
     // Check if sessionId is undefined or empty
     if (!sessionId || sessionId.trim() === "") {
         return res.status(403).render('forbidden', { message: 'FORBIDDEN' });
@@ -104,8 +104,8 @@ profile.put('/updatepassword', async (req, res) => {
     }
 
     const [iv, encryptedData] = loginField.split(':');
-    const hashnewpass = await hashPassword(newpassword)
-
+    const hashnewpass = await hashPassword(newpassword);
+    
     
     // Decrypt the login field
     try{
@@ -128,7 +128,7 @@ profile.put('/updatepassword', async (req, res) => {
 
     const userId = session.user.id
 
-    const oldhash = await prisma.Users.findUnique({
+    const oldhash = await prisma.users.findUnique({
         where: { id: userId},
         select: {
             password: true,
@@ -137,13 +137,17 @@ profile.put('/updatepassword', async (req, res) => {
     
     try {
         if (await verifyPassword(oldhash.password, oldpassword)) {
-            const updatedUser = await prisma.Users.update({
+            const updatedUser = await prisma.users.update({
                 where: { id: userId },
-                data: { password: hashnewpass },
+                data: { 
+                    password: hashnewpass, 
+                    temppass: null
+                },
             });
             res.status(200).json(updatedUser);
             
         } else {
+            console.log(oldpassword)
             res.status(401).json({message: "Your old password is incorrect."})
         }
     } catch (error) {
