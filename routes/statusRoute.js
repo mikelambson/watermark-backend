@@ -51,6 +51,7 @@ statusRouter.get("/", (req, res, next) => {
   res.flushHeaders();
   res.write("retry: 10000\n\n");
   res.write(`data: ${initMessage}\n\n`);
+  // res.write(`data: ${timestamp}\n\n`);
   
   // Send existing log data to the new client
   sendLogDataToClient(res);
@@ -59,7 +60,7 @@ statusRouter.get("/", (req, res, next) => {
 
   // Handle client disconnection
   req.on("close", () => {
-    clients.splice(clients.indexOf(res), 1);
+    clients = clients.filter((c) => c !== res);
   });
 });
 
@@ -67,7 +68,7 @@ statusRouter.get("/", (req, res, next) => {
 function sendLogDataToClient(client) {
   
   // Get the last sent timestamp for this client
-  const lastSentTimestamp = client.lastSentTimestamp || null;
+  const lastSentTimestamp = null;
   // Get the log entries
   const logEntries = Object.entries(getLog());
   // Find the index of the last sent timestamp
