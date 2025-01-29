@@ -3,6 +3,8 @@ import express from "express";
 import { PrismaClient } from '@prisma/client';
 import { updateLogData } from "../statusRoute.js";
 import orders from "./orders.js";
+import { updateDeliveries } from "./updateDeliveries.js";
+import { authorize } from "../../middleware/authorize.js";
 
 
 // Initialize
@@ -12,6 +14,7 @@ const prisma = new PrismaClient();
 
 // Route for Unscheduled Orders
 schedule.use('/unscheduled', orders);
+schedule.use ('/updateDeliveries', authorize(['can_manage_schedule']), updateDeliveries);
 
 ////////////////////////////// Schedule ////////////////////////////////////////
 
