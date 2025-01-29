@@ -5,6 +5,7 @@ import { prisma } from "@/utils/db";
 //     id SERIAL PRIMARY KEY,
 //     name TEXT NOT NULL,
 //     description TEXT,
+//     permissions JSONB,  -- Permissions required to view this report
 //     query JSONB NOT NULL,  -- Query structure as JSON
 //     created_by UUID REFERENCES users(id),
 //     created_at TIMESTAMPTZ DEFAULT now(),
