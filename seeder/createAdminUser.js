@@ -9,7 +9,7 @@ async function createAdminUser() {
     const hashedPassword = await argon2.hash('admin');
 
     // Find the sysadmin role
-    const role = await prisma.Roles.findUnique({
+    const role = await prisma.roles.findUnique({
       where: { name: 'sysadmin' },
     });
 
@@ -19,18 +19,20 @@ async function createAdminUser() {
     }
 
     // Create the admin user
-    const newUser = await prisma.Users.create({
+    const newUser = await prisma.users.create({
       data: {
         login: 'admin',
         password: hashedPassword,
-        firstName: 'Admin',
-        lastName: 'User',
+        firstName: 'System',
+        lastName: 'Administrator',
         email: 'admin@example.com', // or any email you prefer
+        tcid_staff: true,
+        protected: true,
       },
     });
 
     // Assign the sysadmin role to the user in the UserRoles table
-    await prisma.UserRoles.create({
+    await prisma.userRoles.create({
       data: {
         userId: newUser.id, // Use the newly created user's ID
         roleId: role.id,     // Use the found role's ID

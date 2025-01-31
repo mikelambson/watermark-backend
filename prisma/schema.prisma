@@ -284,7 +284,7 @@ model Measurements {
   id                String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   startTime         DateTime
   stopTime          DateTime?
-  measurement       Int
+  measurement       Float
   measurementType   String @default("estimation")
   measurementNote   String?
   deliveryId        String @db.Uuid
