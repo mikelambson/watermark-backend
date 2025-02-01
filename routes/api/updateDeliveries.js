@@ -31,7 +31,11 @@ updateDeliveries.get('/:id', authorize(['can_update_deliveries']), async (req, r
                 ],
             },
             include: {
-                deliveries: true,
+                deliveries: {
+                    include: {
+                        measurement: true
+                    },
+                },
             },
         });
 
