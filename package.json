@@ -18,7 +18,7 @@
   },
   "type": "module",
   "dependencies": {
-    "@prisma/client": "^5.18.0",
+    "@prisma/client": "^6.4.1",
     "argon2": "^0.40.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -39,7 +39,7 @@
   },
   "devDependencies": {
     "nodemon": "^3.0.1",
-    "prisma": "^5.18.0"
+    "prisma": "^6.4.1"
   },
   "linecount": 6638
 }
