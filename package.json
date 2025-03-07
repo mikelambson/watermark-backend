@@ -14,7 +14,8 @@
     "pm2": "pm2 start 'npm run dev' --name backend",
     "stop": "pm2 stop backend && pm2 delete backend",
     "scale": "pm2 scale backend +3",
-    "log": "pm2 logs --raw"
+    "log": "pm2 logs --raw",
+    "ingest": "nodemon ingestion/ingestMeterData.js"
   },
   "type": "module",
   "dependencies": {
@@ -38,7 +39,7 @@
     "passport-local": "*"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1",
+    "nodemon": "^3.1.9",
     "prisma": "^6.4.1"
   },
   "linecount": 6638
